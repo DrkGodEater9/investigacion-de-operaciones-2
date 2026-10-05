@@ -8,3 +8,6 @@ Thumbs.db
 .vscode/
 .idea/
 captura-*.png
+
+# Prompts de trabajo para Gemini (no van al repo)
+prompts_gemini_1-2_entera_mixta.md
