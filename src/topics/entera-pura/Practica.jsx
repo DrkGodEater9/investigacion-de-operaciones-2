@@ -516,7 +516,7 @@ export default function Practica() {
         )}
 
         {/* Botones de acción */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--rule)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--rule)' }}>
           <button
             type="button"
             className="btn btn--primary"

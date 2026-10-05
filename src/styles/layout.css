@@ -150,3 +150,14 @@
   .foot-link { max-width: 48%; }
 }
 @media (prefers-reduced-motion: reduce) { .site-nav, .sb-chev { transition: none; } }
+
+/* Celulares muy angostos (320 px): nada debe ensanchar la página */
+@media (max-width: 360px) {
+  .site-content { padding-left: 12px; padding-right: 12px; }
+  .module-card, .module-card-head, .toc, .toc li, .toc a { min-width: 0; max-width: 100%; }
+  .toc a { overflow-wrap: anywhere; }
+  select { max-width: 100%; }
+  .solver-header-actions, .example-selector-label { flex-wrap: wrap; max-width: 100%; }
+  .example-select { min-width: 0; max-width: 100%; }
+  .tool-group, .diagram-head, .diagram-toolbar { flex-wrap: wrap; max-width: 100%; }
+}

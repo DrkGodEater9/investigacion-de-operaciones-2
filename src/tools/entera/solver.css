@@ -597,3 +597,8 @@
     padding: 0 8px;
   }
 }
+
+/* Tabla de restricciones en pantallas angostas: los coeficientes nunca se recortan; si no cabe, la tabla se desplaza dentro de su caja */
+.constraints-table .input-num { min-width: 46px; }
+.constraints-table th.th-b { white-space: normal; }
+.th-b, .td-b { min-width: 58px; }

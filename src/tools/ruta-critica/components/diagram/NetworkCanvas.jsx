@@ -22,6 +22,7 @@ export default function NetworkCanvas({
   const r = layout.radius;
   const decimals = analysis.decimals;
   const gesture = useRef(null);
+  const pointers = useRef(new Map()); // dedos activos, para el zoom con pellizco
 
   const geometries = useMemo(() => {
     const g = {};
@@ -82,14 +83,33 @@ export default function NetworkCanvas({
 
   const onPointerDown = (e) => {
     if (e.button !== 0) return;
-    gesture.current = { type: 'pan', cx: e.clientX, cy: e.clientY, start: view };
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     svgRef.current.setPointerCapture(e.pointerId);
+    if (pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      gesture.current = {
+        type: 'pinch',
+        d0: Math.hypot(a.x - b.x, a.y - b.y) || 1,
+        start: view,
+        anchor: toSvg((a.x + b.x) / 2, (a.y + b.y) / 2),
+      };
+      return;
+    }
+    gesture.current = { type: 'pan', cx: e.clientX, cy: e.clientY, start: view };
   };
 
   const onPointerMove = (e) => {
+    if (pointers.current.has(e.pointerId)) pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const g = gesture.current;
     if (!g) return;
-    if (g.type === 'node') {
+    if (g.type === 'pinch') {
+      if (pointers.current.size < 2) return;
+      const [a, b] = [...pointers.current.values()];
+      const k = g.d0 / (Math.hypot(a.x - b.x, a.y - b.y) || 1);
+      const w = Math.min(Math.max(g.start.w * k, 120), 20000);
+      const f = w / g.start.w;
+      setView({ x: g.anchor.x - (g.anchor.x - g.start.x) * f, y: g.anchor.y - (g.anchor.y - g.start.y) * f, w, h: g.start.h * f });
+    } else if (g.type === 'node') {
       const p = toSvg(e.clientX, e.clientY);
       const [min, max] = g.limits;
       const x = Math.min(Math.max(p.x + g.dx, min), Math.max(min, max));
@@ -101,7 +121,10 @@ export default function NetworkCanvas({
     }
   };
 
-  const endGesture = () => { gesture.current = null; };
+  const endGesture = (e) => {
+    pointers.current.delete(e.pointerId);
+    gesture.current = null;
+  };
 
   const critOn = visible.critical && options.showCritical && !!times;
   const edgeStyle = (e) => {

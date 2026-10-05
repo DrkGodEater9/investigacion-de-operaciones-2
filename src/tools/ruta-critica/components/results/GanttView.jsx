@@ -20,7 +20,7 @@ export default function GanttView({ analysis, hoveredAct, onHoverAct }) {
   return (
     <div className="gantt">
       <div className="table-scroll">
-        <svg viewBox={`0 0 ${W} ${H}`} className="gantt-svg" style={{ minWidth: 640 }}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="gantt-svg" style={{ minWidth: 440 }}>
           <defs>
             <pattern id="float" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
               <line x1="0" y1="0" x2="0" y2="5" stroke="#000" strokeWidth="0.8" />

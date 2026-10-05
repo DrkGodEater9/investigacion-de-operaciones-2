@@ -1,7 +1,7 @@
 # Investigación de operaciones II: sitio de estudio
 
 Sitio en React (Vite) con un menú por módulos y temas. Cada tema tiene Teoría, Paso a paso, Resuelve el tuyo y Práctica.
-Hoy están hechos: 3.1 (Teoría y Resuelve) y 3.2 (Resuelve); el resto está como esqueleto con su plan.
+Hoy están hechos: 1.1 (las cuatro partes), 3.1 (Teoría y Resuelve) y 3.2 (Resuelve); el resto está como esqueleto con su plan.
 
 ```bash
 npm install

@@ -85,7 +85,7 @@ export function TreeDiagram({ nodes = [], activeNodeId = null }) {
           role="img"
           aria-label="Árbol de ramificación y acotamiento"
           className="tree-diagram-svg"
-          style={{ width: '100%', minWidth: Math.min(layout.width, 680), maxWidth: '100%', height: 'auto', display: 'block' }}
+          style={{ width: '100%', minWidth: Math.min(layout.width * 0.7, 680), maxWidth: '100%', height: 'auto', display: 'block' }}
         >
           {/* Conexiones (flechas entre padre e hijo) */}
           {layout.nodes.map((node) => {

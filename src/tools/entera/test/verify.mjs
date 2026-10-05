@@ -267,26 +267,36 @@ for (let t = 0; t < TOTAL_RANDOM_TESTS; t++) {
     enumerate(0, Array(nVars).fill(0));
 
     if (bruteBestZ === null) {
-      // Fuerza bruta dice infactible en la caja [0, MAX_BOX]
+      // Infactible en la caja [0, MAX_BOX]: solveIP debe ser infactible o tener su óptimo fuera de la caja
       if (ipResult.status === 'infeasible') {
         infeasibleCount++;
         matchCount++;
+      } else if (ipResult.status === 'optimal' && !ipResult.best.x.every(x => x.toNumber() <= MAX_BOX)) {
+        matchCount++;
+      } else if (ipResult.status === 'nodeLimit' || ipResult.status === 'unbounded') {
+        matchCount++;
+      } else {
+        throw new Error(`Test #${t}: fuerza bruta infactible pero solveIP=${ipResult.status}
+c: ${JSON.stringify(c)}, cts: ${JSON.stringify(constraints)}`);
       }
+    } else if (ipResult.status === 'optimal') {
+      const ipZ = ipResult.best.z.toNumber();
+      if (ipZ === bruteBestZ) {
+        matchCount++;
+      } else if (ipResult.best.x.every(x => x.toNumber() <= MAX_BOX) || (isMax ? ipZ < bruteBestZ : ipZ > bruteBestZ)) {
+        throw new Error(
+          `Discrepancia en test #${t}: solveIP Z=${ipZ} vs BruteForce Z=${bruteBestZ}
+` +
+          `c: ${JSON.stringify(c)}, cts: ${JSON.stringify(constraints)}`
+        );
+      } else {
+        matchCount++; // el óptimo estaba fuera de la caja de fuerza bruta
+      }
+    } else if (ipResult.status === 'nodeLimit' || ipResult.status === 'unbounded') {
+      matchCount++; // problema no acotado: la caja solo lo trunca
     } else {
-      if (ipResult.status === 'optimal') {
-        const ipZ = ipResult.best.z.toNumber();
-        if (ipZ === bruteBestZ) {
-          matchCount++;
-        } else if (ipResult.best.x.every(x => x.toNumber() <= MAX_BOX)) {
-          throw new Error(
-            `Discrepancia en test #${t}: solveIP Z=${ipZ} vs BruteForce Z=${bruteBestZ}\n` +
-            `c: ${JSON.stringify(c)}, cts: ${JSON.stringify(constraints)}`
-          );
-        } else {
-          // El óptimo estaba fuera de la caja de fuerza bruta
-          matchCount++;
-        }
-      }
+      throw new Error(`Test #${t}: fuerza bruta halló Z=${bruteBestZ} pero solveIP=${ipResult.status}
+c: ${JSON.stringify(c)}, cts: ${JSON.stringify(constraints)}`);
     }
   } else {
     // Caso mixto: verificar propiedades matemáticas

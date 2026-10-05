@@ -108,7 +108,7 @@ export default function Paso() {
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, maxWidth: '100%' }}>
           <label htmlFor="paso-example-select" style={{ fontSize: '13px', fontWeight: 500 }}>
             Ejemplo:
           </label>
@@ -117,7 +117,7 @@ export default function Paso() {
             value={exampleId}
             onChange={(e) => handleExampleChange(e.target.value)}
             style={{
-              height: '32px',
+              height: '32px', minWidth: 0, flex: '1 1 auto',
               fontSize: '13px',
               padding: '0 28px 0 10px',
               border: '1px solid var(--rule-strong)',
@@ -345,7 +345,7 @@ export default function Paso() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: diagramView === 'both' ? 'repeat(auto-fit, minmax(320px, 1fr))' : '1fr',
+            gridTemplateColumns: diagramView === 'both' ? 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))' : '1fr',
             gap: '16px',
             alignItems: 'start',
           }}

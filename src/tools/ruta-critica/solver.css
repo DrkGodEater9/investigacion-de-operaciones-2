@@ -75,7 +75,7 @@
 .diagram-panel { display: flex; flex-direction: column; }
 .diagram-head { border-bottom: 1px solid var(--rule); }
 .diagram-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px 18px; flex-wrap: wrap; padding: 8px 12px; }
-.tool-group { display: flex; align-items: center; gap: 4px; }
+.tool-group { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .tool-toggles { gap: 16px; flex-wrap: wrap; }
 .export-menu { position: relative; }
 .menu { position: absolute; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid var(--ink); border-radius: var(--radius); z-index: 20; min-width: 210px; padding: 4px; }
