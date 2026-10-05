@@ -1,6 +1,6 @@
-import { EXAMPLES } from '../domain/examples.js';
+import { EXAMPLES as EJEMPLOS_ENTERA } from '../domain/examples.js';
 
-export function SolverHeader({ title, onSelectExample }) {
+export function SolverHeader({ title, onSelectExample, examples = EJEMPLOS_ENTERA }) {
   return (
     <header className="solver-header">
       <div className="solver-header-main">
@@ -24,7 +24,7 @@ export function SolverHeader({ title, onSelectExample }) {
             <option value="" disabled>
               Cargar ejemplo…
             </option>
-            {EXAMPLES.map((ex) => (
+            {examples.map((ex) => (
               <option key={ex.id} value={ex.id}>
                 {ex.title}
               </option>

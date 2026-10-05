@@ -30,7 +30,37 @@ Sentido: Minimizar
 | R2 | 1 | 3 | >= | 6 |`,
 };
 
-const PROMPT = (tpl) => `Convierte el enunciado o ejercicio que te adjunto (foto, PDF o texto) en una tabla Markdown con exactamente este formato, sin texto adicional antes ni después:
+const TEMPLATES_MIXTA = {
+  dos: `# Problema mixto de 2 variables
+Sentido: Maximizar
+Enteras: x2
+
+| Tipo | x1 | x2 | Op | b |
+|---|---|---|---|---|
+| FO | 7 | 9 | | |
+| R1 | -1 | 3 | <= | 6 |
+| R2 | 7 | 1 | <= | 35 |`,
+  tres: `# Problema mixto de 3 variables
+Sentido: Maximizar
+Enteras: x1, x3
+
+| Tipo | x1 | x2 | x3 | Op | b |
+|---|---|---|---|---|---|
+| FO | 4 | 3 | 2 | | |
+| R1 | 6 | 0 | 4 | <= | 35 |
+| R2 | 3 | 7 | 5 | <= | 125 |`,
+  min: `# Problema mixto de minimización
+Sentido: Minimizar
+Enteras: x1, x2
+
+| Tipo | x1 | x2 | x3 | Op | b |
+|---|---|---|---|---|---|
+| FO | 63 | 18 | 21 | | |
+| R1 | 0 | 3/2 | 1 | >= | 29/4 |
+| R2 | 1 | 0 | 0 | >= | 1 |`,
+};
+
+const PROMPT = (tpl, mixed) => `Convierte el enunciado o ejercicio que te adjunto (foto, PDF o texto) en una tabla Markdown con exactamente este formato, sin texto adicional antes ni después:
 
 ${tpl}
 
@@ -39,12 +69,14 @@ Reglas:
 - La segunda línea debe indicar «Sentido: Maximizar» o «Sentido: Minimizar».
 - La tabla debe tener la fila «FO» con los coeficientes c_j de la función objetivo.
 - Cada restricción va en una fila «R1», «R2», etc., con sus coeficientes, el operador (<=, >= o =) y el término independiente b.
-- Todas las variables se asumen no negativas (x_j >= 0) y enteras (x_j in Z).
+${mixed
+  ? '- Todas las variables son no negativas (x_j >= 0). Después de la línea «Sentido» agrega la línea «Enteras: x1, x3» con las variables que deben ser enteras; las que no menciones son continuas (se pueden fraccionar).'
+  : '- Todas las variables se asumen no negativas (x_j >= 0) y enteras (x_j in Z).'}
 - Si un coeficiente es fraccionario o decimal, usa números o fracciones (por ejemplo 5/2 o 2.5).`;
 
-export function TemplatePanel({ notify }) {
+export function TemplatePanel({ notify, mixed = false }) {
   const [kind, setKind] = useState('dos');
-  const tpl = TEMPLATES[kind];
+  const tpl = (mixed ? TEMPLATES_MIXTA : TEMPLATES)[kind];
 
   const copy = async (text, what) =>
     notify((await copyText(text)) ? `${what} copiada al portapapeles` : 'El navegador no permitió copiar.');
@@ -86,12 +118,12 @@ export function TemplatePanel({ notify }) {
           <button
             type="button"
             className="btn btn--sm btn--primary"
-            onClick={() => copy(PROMPT(tpl), 'Instrucción')}
+            onClick={() => copy(PROMPT(tpl, mixed), 'Instrucción')}
           >
             Copiar instrucción
           </button>
         </div>
-        <pre className="prompt">{PROMPT(tpl)}</pre>
+        <pre className="prompt">{PROMPT(tpl, mixed)}</pre>
       </div>
     </div>
   );

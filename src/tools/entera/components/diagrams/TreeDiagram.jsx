@@ -148,6 +148,12 @@ export function TreeDiagram({ nodes = [], activeNodeId = null }) {
               return '(' + vec.map((v) => (v.toDual ? v.toDual() : String(v))).join('; ') + ')';
             };
 
+            // Si el texto no cabe en el recuadro (4 o más variables), se comprime para que no se salga.
+            const textoX = Array.isArray(node.x) ? `x = ${formatX(node.x)}` : 'Infactible';
+            const ajusteX = textoX.length * 6.3 > 148
+              ? { textLength: 148, lengthAdjust: 'spacingAndGlyphs' }
+              : {};
+
             return (
               <g key={`node-${node.id}`} transform={`translate(${node.posX}, ${node.posY})`}>
                 <rect
@@ -193,8 +199,9 @@ export function TreeDiagram({ nodes = [], activeNodeId = null }) {
                   fontFamily={SERIF}
                   fontSize="12.5"
                   fill="#000"
+                  {...ajusteX}
                 >
-                  {Array.isArray(node.x) ? `x = ${formatX(node.x)}` : 'Infactible'}
+                  {textoX}
                 </text>
 
                 <text

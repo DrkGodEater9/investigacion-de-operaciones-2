@@ -22,6 +22,12 @@ export const BUILT = {
     resuelve: lazy(() => import('../topics/entera-pura/Resuelve.jsx')),
     practica: lazy(() => import('../topics/entera-pura/Practica.jsx')),
   },
+  'entera-mixta': {
+    teoria: lazy(() => import('../topics/entera-mixta/Teoria.jsx')),
+    paso: lazy(() => import('../topics/entera-mixta/Paso.jsx')),
+    resuelve: lazy(() => import('../topics/entera-mixta/Resuelve.jsx')),
+    practica: lazy(() => import('../topics/entera-mixta/Practica.jsx')),
+  },
 };
 
 export const builtSlots = (topicId) => Object.keys(BUILT[topicId] || {});

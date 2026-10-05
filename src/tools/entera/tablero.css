@@ -1,0 +1,23 @@
+/* Tablero simplex en la notación del profesor (filas Cj, V.B., C_B, Zj, Cj−Zj, bj). */
+.tablero-wrap { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tablero-titulo { margin: 0; font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--muted); }
+.tablero-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper); }
+.tablero-simplex { border-collapse: collapse; font-family: var(--serif); font-size: 14.5px; color: var(--ink); width: max-content; min-width: 100%; }
+.tablero-simplex th,
+.tablero-simplex td { border: 1px solid var(--rule); padding: 4px 10px; text-align: center; font-weight: 400; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tablero-simplex thead th,
+.tablero-simplex tbody th { font-weight: 600; background: var(--wash); }
+.tablero-simplex .tb-cj th,
+.tablero-simplex .tb-cj td { background: var(--paper); font-style: italic; color: var(--muted); }
+.tablero-simplex .tb-vacio { background: var(--paper); border-color: transparent; }
+.tablero-simplex .tb-sep { border-top: 1.5px solid var(--ink); }
+.tablero-simplex .tb-etq { text-align: right; font-weight: 600; background: var(--wash); }
+.tablero-simplex .tb-colpivote { background: var(--accent-wash); }
+.tablero-simplex .tb-pivote { outline: 3px solid var(--accent); outline-offset: -3px; font-weight: 700; color: var(--accent); }
+.tablero-simplex .tb-sale th,
+.tablero-simplex .tb-sale td { font-weight: 700; }
+.tablero-simplex .tb-razon { color: var(--accent); font-style: italic; }
+.tablero-simplex .tb-razon-fila th,
+.tablero-simplex .tb-razon-fila td { background: var(--paper); }
+.tablero-simplex sub { font-size: 0.72em; line-height: 0; }
+.tablero-nota { margin: 0; font-size: 12.5px; color: var(--muted); }

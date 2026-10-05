@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { EXAMPLES } from './domain/examples.js';
 import { useModel } from './hooks/useModel.js';
 import { useSolver } from './hooks/useSolver.js';
 import { SolverHeader } from './components/SolverHeader.jsx';
@@ -18,6 +19,7 @@ export default function EnteraSolver({
   start = 'tema',
   allowIntegerToggle = false,
   title = 'Programación entera pura',
+  examples = EXAMPLES,
 }) {
   const {
     model,
@@ -33,7 +35,7 @@ export default function EnteraSolver({
     setOptions,
     loadExample,
     loadFromMarkdown,
-  } = useModel(start, !allowIntegerToggle);
+  } = useModel(start, !allowIntegerToggle, examples);
 
   const { ok, errors, warnings, result } = useSolver(model);
 
@@ -45,6 +47,7 @@ export default function EnteraSolver({
     <div className="solver">
       <SolverHeader
         title={title}
+        examples={examples}
         onSelectExample={loadExample}
       />
       <div className="solver-fit">

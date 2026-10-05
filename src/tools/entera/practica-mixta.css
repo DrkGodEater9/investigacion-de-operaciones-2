@@ -1,0 +1,33 @@
+/* Práctica de entera mixta: solo estructura; colores y bordes salen de base.css */
+.pm { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; min-width: 0; }
+.pm-tipos .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--ink); max-width: 100%; }
+.pm-tipos .segmented button, .pm-tipos .segmented button + button { border: 0; padding: 8px 6px; min-height: 36px; }
+@media (min-width: 720px) { .pm-tipos .segmented { grid-template-columns: repeat(6, auto); } .pm-tipos .segmented button { padding: 6px 14px; } }
+.pm-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.pm-barra .inline-field input { width: 90px; }
+.pm-sesion { margin-left: auto; font-size: 13px; color: var(--muted); }
+.pm-card { border: 1px solid var(--rule-strong); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.pm-card h3 { font-family: var(--serif); font-size: 18px; }
+.pm-semilla { font-size: 12px; color: var(--muted); }
+.pm-enunciado { font-family: var(--serif); font-size: 16px; overflow-x: auto; max-width: 100%; }
+.pm-enunciado .mini-table { margin-bottom: 4px; }
+.pm-enunciado .mini-table th, .pm-enunciado .mini-table td { padding-right: 14px; }
+.pm-campos { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--rule); padding-top: 14px; }
+.pm-campo { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.pm-campo legend, .pm-campo > label { font-weight: 600; font-size: 13.5px; padding: 0; }
+.pm-campo input[type='text'] { height: 34px; width: 100%; max-width: 220px; border: 1px solid var(--rule-strong); border-radius: var(--radius); padding: 0 10px; background: #fff; }
+.pm-opciones { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.pm-opciones label { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
+.pm-opciones input { width: 18px; height: 18px; accent-color: var(--accent); }
+.pm-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.pm-resultado { border: 1px solid var(--ink); border-radius: var(--radius); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.pm-resultado.is-mal { border-color: var(--red); }
+.pm-resultado h4 { margin: 0; font-size: 14px; }
+.pm-detalle { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pm-detalle li { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; }
+.pm-detalle .status-mark { margin-top: 3px; flex: none; }
+.pm-detalle b { font-weight: 600; }
+.pm-error-comun { border-left: 3px solid var(--red); padding-left: 10px; font-size: 13.5px; }
+.pm-explicacion { margin: 0; padding-left: 20px; font-size: 13.5px; display: flex; flex-direction: column; gap: 4px; }
+.pm-enlaces { font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.pm-enlaces a { color: var(--accent); }

@@ -1,6 +1,8 @@
+import { describirIntegralidad } from './exportData.js';
 import { saveFile } from '@/shared/files.js';
 
 export async function exportPdf({ model, result, title = 'Programación entera pura' }) {
+  const mixtoPdf = Array.isArray(model.integer) && model.integer.some((v) => v === false);
   const [{ jsPDF }, autoTableMod, fonts] = await Promise.all([
     import('jspdf'),
     import('jspdf-autotable'),
@@ -61,7 +63,7 @@ export async function exportPdf({ model, result, title = 'Programación entera p
     doc.text(`${lhs} ${op} ${ct.b}`, MARGIN + 24, y);
     y += 13;
   });
-  doc.text('x_j >= 0, x_j enteras para todo j', MARGIN + 24, y);
+  doc.text(describirIntegralidad(model, 'pdf'), MARGIN + 24, y);
   y += 20;
 
   // Sección: Resumen de resultados
@@ -87,7 +89,7 @@ export async function exportPdf({ model, result, title = 'Programación entera p
   }
 
   if (result.best) {
-    doc.text(`Valor óptimo entero Z*: ${result.best.z.toDual()}`, MARGIN + 12, y);
+    doc.text(`Valor óptimo ${mixtoPdf ? 'mixto' : 'entero'} Z*: ${result.best.z.toDual()}`, MARGIN + 12, y);
     y += 14;
     doc.text(`Punto óptimo X*: (${result.best.x.map((v) => v.toDual()).join('; ')})`, MARGIN + 12, y);
     y += 14;

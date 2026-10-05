@@ -19,7 +19,7 @@ export function ResultsPanel({ model, result, notify }) {
     try {
       setIsExportingPdf(true);
       notify?.('Generando documento PDF...');
-      const ok = await exportPdf({ model, result, title: 'Programación entera pura' });
+      const ok = await exportPdf({ model, result, title: Array.isArray(model.integer) && model.integer.some((v) => v === false) ? 'Programación entera mixta' : 'Programación entera pura' });
       if (ok) notify?.('PDF generado y descargado con éxito.');
     } catch (err) {
       console.error(err);
@@ -90,7 +90,7 @@ export function ResultsPanel({ model, result, notify }) {
       </div>
 
       {/* Tarjetas resumen */}
-      <SummaryCards result={result} numVars={model.c.length} />
+      <SummaryCards result={result} numVars={model.c.length} mixed={Array.isArray(model.integer) && model.integer.some((v) => v === false)} />
 
       {/* Visualización de diagramas */}
       <div className="diagram-section-container">

@@ -161,3 +161,47 @@ export function get2DIntegerPoints(constraints, bounds, maxLimit = 1500) {
 
   return { tooMany: false, points };
 }
+
+/**
+ * Conjunto factible de un modelo MIXTO de 2 variables en el que exactamente una es entera:
+ * un segmento por cada valor entero k de esa variable, con el intervalo que le queda a la continua.
+ * Devuelve [{ varIdx, valor, desde, hasta }] (varIdx = índice de la variable entera; desde/hasta son
+ * fracciones exactas sobre la otra variable). Cálculo exacto con fracciones.
+ */
+export function get2DMixedSegments(constraints, intIdx, maxEntero = 80) {
+  const contIdx = 1 - intIdx;
+  const segmentos = [];
+  for (let k = 0; k <= maxEntero; k++) {
+    const kf = new Fraction(BigInt(k), 1n);
+    let lo = ZERO;
+    let hi = null; // sin cota superior todavía
+    let vacio = false;
+    for (const ct of constraints) {
+      const ai = frac(ct.a[intIdx] || 0);
+      const ac = frac(ct.a[contIdx] || 0);
+      const resto = frac(ct.b).sub(ai.mul(kf)); // ac * xc (op) resto
+      if (ac.isZero()) {
+        const ok =
+          (ct.op === '<=' && ZERO.lte(resto)) ||
+          (ct.op === '>=' && ZERO.gte(resto)) ||
+          (ct.op === '=' && resto.isZero());
+        if (!ok) { vacio = true; break; }
+        continue;
+      }
+      const v = resto.div(ac);
+      const esCota = (ct.op === '<=' && ac.gt(ZERO)) || (ct.op === '>=' && ac.lt(ZERO));
+      if (ct.op === '=') {
+        if (v.gt(lo)) lo = v;
+        if (hi === null || v.lt(hi)) hi = v;
+      } else if (esCota) {
+        if (hi === null || v.lt(hi)) hi = v;
+      } else if (v.gt(lo)) {
+        lo = v;
+      }
+    }
+    if (vacio) continue;
+    if (hi === null) return { sinCota: true, segmentos };
+    if (lo.lte(hi)) segmentos.push({ varIdx: intIdx, valor: k, desde: lo, hasta: hi });
+  }
+  return { sinCota: false, segmentos };
+}

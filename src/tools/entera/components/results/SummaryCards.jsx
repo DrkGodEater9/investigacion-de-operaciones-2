@@ -1,4 +1,4 @@
-export function SummaryCards({ result, numVars }) {
+export function SummaryCards({ result, numVars, mixed = false }) {
   if (!result) return null;
 
   const isOptimal = result.status === 'optimal';
@@ -17,14 +17,14 @@ export function SummaryCards({ result, numVars }) {
       <div className={`summary-card ${isOptimal ? 'summary-card--optimal' : 'summary-card--alert'}`}>
         <span className="summary-card-label">Estado</span>
         <strong className="summary-card-value">
-          {isOptimal && 'Óptimo entero'}
-          {isInfeasible && 'Infactible (sin enteros)'}
+          {isOptimal && (mixed ? 'Óptimo mixto' : 'Óptimo entero')}
+          {isInfeasible && (mixed ? 'Infactible (sin solución mixta)' : 'Infactible (sin enteros)')}
           {isUnbounded && 'No acotado'}
           {isNodeLimit && 'Límite de nodos'}
         </strong>
         <span className="summary-card-desc">
-          {isOptimal && 'Solución entera factible óptima encontrada.'}
-          {isInfeasible && 'El problema no tiene ninguna solución entera factible.'}
+          {isOptimal && (mixed ? 'Solución factible óptima: las variables enteras son enteras y las continuas pueden ser fracciones.' : 'Solución entera factible óptima encontrada.')}
+          {isInfeasible && (mixed ? 'El problema no tiene ninguna solución factible que cumpla la condición entera.' : 'El problema no tiene ninguna solución entera factible.')}
           {isUnbounded && 'La región o la función objetivo crece indefinidamente.'}
           {isNodeLimit && 'Se exploró el máximo de nodos sin cerrar todas las ramas.'}
         </span>
@@ -63,7 +63,7 @@ export function SummaryCards({ result, numVars }) {
           {result.counts.nodes} {result.counts.nodes === 1 ? 'nodo' : 'nodos'}
         </strong>
         <span className="summary-card-desc">
-          {result.counts.pruned} podados · {result.counts.integer} soluciones enteras
+          {result.counts.pruned} podados · {result.counts.integer} {mixed ? 'soluciones factibles mixtas' : 'soluciones enteras'}
         </span>
       </div>
     </div>

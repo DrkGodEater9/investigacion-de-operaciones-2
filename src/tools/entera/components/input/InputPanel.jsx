@@ -71,7 +71,7 @@ export function InputPanel({
           </>
         )}
 
-        {tab === 'template' && <TemplatePanel notify={notify} />}
+        {tab === 'template' && <TemplatePanel notify={notify} mixed={allowIntegerToggle} />}
       </div>
     </section>
   );

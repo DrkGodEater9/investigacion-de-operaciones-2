@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { get2DFeasibleRegion, get2DIntegerPoints } from '../../domain/geometry.js';
+import { get2DFeasibleRegion, get2DIntegerPoints, get2DMixedSegments } from '../../domain/geometry.js';
 import { frac } from '../../domain/fraction.js';
 
 const SERIF = "'STIX Two Text', 'Times New Roman', serif";
@@ -12,10 +12,18 @@ export function RegionPlot2D({ model, result, stepState = null }) {
     if (!is2D) return null;
     const region = get2DFeasibleRegion(model.constraints);
     let intPointsData = { tooMany: false, points: [] };
+    // Modelo mixto: x_j continua se dibuja como segmentos, no como puntos.
+    const flags = [0, 1].map((j) => !(model.integer && model.integer[j] === false));
+    const nEnteras = flags.filter(Boolean).length;
+    let segmentos = [];
     if (region.status === 'ok' && region.isBounded && region.bounds) {
-      intPointsData = get2DIntegerPoints(model.constraints, region.bounds);
+      if (nEnteras === 2) {
+        intPointsData = get2DIntegerPoints(model.constraints, region.bounds);
+      } else if (nEnteras === 1) {
+        segmentos = get2DMixedSegments(model.constraints, flags[0] ? 0 : 1).segmentos;
+      }
     }
-    return { region, intPointsData };
+    return { region, intPointsData, segmentos, nEnteras };
   }, [is2D, model]);
 
   if (!is2D) {
@@ -34,7 +42,7 @@ export function RegionPlot2D({ model, result, stepState = null }) {
     );
   }
 
-  const { region, intPointsData } = data;
+  const { region, intPointsData, segmentos, nEnteras } = data;
 
   // Determinar límites del gráfico
   const bX = region.bounds ? region.bounds.maxX : 6;
@@ -365,6 +373,23 @@ export function RegionPlot2D({ model, result, stepState = null }) {
           </g>
         ))}
 
+        {/* Modelo mixto con una variable entera: lo factible son segmentos */}
+        {segmentos.map((sg) => {
+          const d = sg.desde.toNumber();
+          const h = sg.hasta.toNumber();
+          const horizontal = sg.varIdx === 1; // x2 entera: segmentos horizontales
+          const [x1, y1, x2, y2] = horizontal
+            ? [toX(d), toY(sg.valor), toX(h), toY(sg.valor)]
+            : [toX(sg.valor), toY(d), toX(sg.valor), toY(h)];
+          return (
+            <line
+              key={`sg-${sg.valor}`}
+              x1={x1} y1={y1} x2={x2} y2={y2}
+              stroke="#1d3f8f" strokeWidth="3.5" strokeLinecap="round"
+            />
+          );
+        })}
+
         {/* Puntos enteros factibles */}
         {intPointsData.points.map((pt, i) => {
           const isOptimal = intPt && Math.abs(pt.x1 - intPt.x1) < 1e-5 && Math.abs(pt.x2 - intPt.x2) < 1e-5;
@@ -532,10 +557,18 @@ export function RegionPlot2D({ model, result, stepState = null }) {
           <span style={{ width: '12px', height: '12px', background: 'rgba(29, 63, 143, 0.1)', border: '1.5px solid #1d3f8f', display: 'inline-block' }} />
           Región factible continua
         </span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#000', display: 'inline-block' }} />
-          Punto entero factible ({intPointsData.points.length})
-        </span>
+        {nEnteras === 2 && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#000', display: 'inline-block' }} />
+            Punto entero factible ({intPointsData.points.length})
+          </span>
+        )}
+        {nEnteras === 1 && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <span style={{ width: '16px', height: '0', borderTop: '3.5px solid #1d3f8f', display: 'inline-block' }} />
+            Segmento factible mixto ({segmentos.length})
+          </span>
+        )}
         {relPt && (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
             <span style={{ width: '9px', height: '9px', background: '#fff', border: '1.5px solid #000', display: 'inline-block' }} />

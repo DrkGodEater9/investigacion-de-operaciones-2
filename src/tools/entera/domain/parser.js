@@ -24,9 +24,15 @@ export function modelToMarkdown(model, title = 'Modelo de Programación Entera')
   const formatRow = (r) => `| ${r.join(' | ')} |`;
 
   const senseLabel = model.sense === 'min' ? 'Minimizar' : 'Maximizar';
+  // Si hay variables continuas (modelo mixto), se declara cuáles son enteras.
+  const integer = Array.isArray(model.integer) ? model.integer : [];
+  const mixto = Array.from({ length: n }, (_, j) => integer[j] !== false).some((v) => !v);
+  const enteras = varHeaders.filter((_, j) => integer[j] !== false);
+  const lineaEnteras = mixto ? [`Enteras: ${enteras.length ? enteras.join(', ') : 'ninguna'}`] : [];
   return [
     `# ${title}`,
     `Sentido: ${senseLabel}`,
+    ...lineaEnteras,
     '',
     formatRow(headers),
     formatRow(separator),
@@ -52,6 +58,16 @@ export function parseModelFromMarkdown(text) {
     }
     if (low.includes('max') || low.includes('maximizar')) {
       sense = 'max';
+      break;
+    }
+  }
+
+  // Línea opcional «Enteras: x1, x3» (el resto son continuas). Sin ella, todas son enteras.
+  let enterasDeclaradas = null;
+  for (const l of lines) {
+    const m = /^enteras?\s*:\s*(.*)$/i.exec(l);
+    if (m) {
+      enterasDeclaradas = new Set((m[1].toLowerCase().match(/x\d+/g) || []));
       break;
     }
   }
@@ -141,7 +157,9 @@ export function parseModelFromMarkdown(text) {
       constraints: constraints.length > 0 ? constraints : [
         { a: Array(numVars).fill('1'), op: '<=', b: '10' }
       ],
-      integer: Array(numVars).fill(true),
+      integer: Array.from({ length: numVars }, (_, j) =>
+        enterasDeclaradas ? enterasDeclaradas.has(`x${j + 1}`) : true
+      ),
     };
   }
 

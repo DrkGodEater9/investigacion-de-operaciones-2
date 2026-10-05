@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import { EXAMPLES } from '../domain/examples.js';
+import { EXAMPLES as EJEMPLOS_ENTERA } from '../domain/examples.js';
 import { parseModelFromMarkdown } from '../domain/parser.js';
 
-export function useModel(initialExampleId = 'tema', defaultAllInteger = true) {
+export function useModel(initialExampleId = 'tema', defaultAllInteger = true, EXAMPLES = EJEMPLOS_ENTERA) {
   const findExample = (id) => EXAMPLES.find((e) => e.id === id) || EXAMPLES[0];
   const initial = findExample(initialExampleId);
 
@@ -147,7 +147,7 @@ export function useModel(initialExampleId = 'tema', defaultAllInteger = true) {
         : [...ex.integer],
       options: { ...ex.options },
     });
-  }, [defaultAllInteger]);
+  }, [defaultAllInteger, EXAMPLES]);
 
   const loadFromMarkdown = useCallback((text) => {
     const parsed = parseModelFromMarkdown(text);

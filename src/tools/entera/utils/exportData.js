@@ -48,11 +48,29 @@ export async function exportNodesCSV(result, filename = 'arbol-ramificacion.csv'
   return await saveFile(filename, csvContent, 'text/csv;charset=utf-8');
 }
 
+/** Descripción de la integralidad del modelo: «todas enteras» o cuáles son enteras y cuáles continuas. */
+export function describirIntegralidad(model, formato = 'md') {
+  const n = model.c.length;
+  const esEntera = (j) => !(Array.isArray(model.integer) && model.integer[j] === false);
+  const enteras = Array.from({ length: n }, (_, j) => j).filter(esEntera).map((j) => `x${j + 1}`);
+  const continuas = Array.from({ length: n }, (_, j) => j).filter((j) => !esEntera(j)).map((j) => `x${j + 1}`);
+  const mixto = continuas.length > 0;
+  if (formato === 'pdf') {
+    return mixto
+      ? `x_j >= 0; enteras: ${enteras.join(', ') || 'ninguna'}; continuas: ${continuas.join(', ')}`
+      : 'x_j >= 0, x_j enteras para todo j';
+  }
+  return mixto
+    ? `xⱼ ≥ 0; enteras: ${enteras.join(', ') || 'ninguna'}; continuas: ${continuas.join(', ')}`
+    : 'xⱼ ≥ 0 y xⱼ ∈ ℤ para todo j';
+}
+
 export async function exportModelMarkdown(model, result, filename = 'modelo-y-resultados.md') {
   const { headers, rows } = getNodesData(result);
+  const mixto = Array.isArray(model.integer) && model.integer.some((v) => v === false);
 
   const lines = [
-    `# Programación entera pura — Resultados`,
+    `# ${mixto ? 'Programación entera mixta' : 'Programación entera pura'} — Resultados`,
     `Fecha: ${new Date().toLocaleDateString('es-CO')}`,
     ``,
     `## Modelo matemático`,
@@ -64,13 +82,13 @@ export async function exportModelMarkdown(model, result, filename = 'modelo-y-re
       const op = ct.op === '<=' ? '≤' : ct.op === '>=' ? '≥' : '=';
       return `- ${ct.a.map((ai, j) => `${ai}x${j + 1}`).join(' + ')} ${op} ${ct.b}`;
     }),
-    `- xⱼ ≥ 0 y xⱼ ∈ ℤ para todo j`,
+    `- ${describirIntegralidad(model)}`,
     ``,
     `## Resumen de la solución`,
   ];
 
   if (result.status === 'optimal' && result.best) {
-    lines.push(`- **Estado:** Solución óptima entera encontrada`);
+    lines.push(`- **Estado:** Solución óptima ${mixto ? 'mixta' : 'entera'} encontrada`);
     lines.push(`- **Valor óptimo Z\*:** ${result.best.z.toDual()}`);
     lines.push(`- **Punto óptimo X\*:** (${result.best.x.map((v) => v.toDual()).join('; ')})`);
   } else if (result.status === 'infeasible') {
