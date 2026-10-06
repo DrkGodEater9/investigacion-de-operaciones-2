@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node src/tools/ruta-critica/test/verify.mjs && node src/tools/entera/test/verify.mjs && node --test src/tools/entera/test/mixta.test.mjs && node --test src/tools/entera/test/practicaMixta.test.mjs && node --test src/tools/entera/test/pasosMixta.test.mjs"
+    "test": "node src/tools/ruta-critica/test/verify.mjs && node src/tools/entera/test/verify.mjs && node --test src/tools/entera/test/mixta.test.mjs && node --test src/tools/entera/test/practicaMixta.test.mjs && node --test src/tools/entera/test/pasosMixta.test.mjs && node --test src/tools/entera/test/estres.test.mjs"
   },
   "author": "",
   "license": "ISC",
