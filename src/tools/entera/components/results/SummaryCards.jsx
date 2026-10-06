@@ -26,7 +26,7 @@ export function SummaryCards({ result, numVars, mixed = false }) {
           {isOptimal && (mixed ? 'Solución factible óptima: las variables enteras son enteras y las continuas pueden ser fracciones.' : 'Solución entera factible óptima encontrada.')}
           {isInfeasible && (mixed ? 'El problema no tiene ninguna solución factible que cumpla la condición entera.' : 'El problema no tiene ninguna solución entera factible.')}
           {isUnbounded && 'La región o la función objetivo crece indefinidamente.'}
-          {isNodeLimit && 'Se exploró el máximo de nodos sin cerrar todas las ramas.'}
+          {isNodeLimit && 'Se exploró el máximo de nodos sin cerrar todas las ramas; la mejor solución hallada puede no ser la óptima.'}
         </span>
       </div>
 
@@ -34,10 +34,10 @@ export function SummaryCards({ result, numVars, mixed = false }) {
       <div className="summary-card">
         <span className="summary-card-label">Valor óptimo (Z*)</span>
         <strong className="summary-card-value summary-card-value--serif">
-          {isOptimal && result.best ? result.best.z.toDual() : '—'}
+          {(isOptimal || isNodeLimit) && result.best ? result.best.z.toDual() : '—'}
         </strong>
         <span className="summary-card-desc">
-          {isOptimal && result.best
+          {(isOptimal || isNodeLimit) && result.best
             ? `x* = ${formatVector(result.best.x)}`
             : 'Sin solución'}
         </span>

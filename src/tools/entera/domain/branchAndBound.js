@@ -397,7 +397,8 @@ export function solveIP({
 
   // Comprobar si se alcanzó el límite de nodos
   const reachedLimit = nodeCount >= maxNodes && openStack.length > 0;
-  const status = incumbent !== null ? 'optimal' : reachedLimit ? 'nodeLimit' : 'infeasible';
+  // Con el límite alcanzado el incumbente es solo la mejor solución hallada, no está probado óptimo
+  const status = reachedLimit ? 'nodeLimit' : incumbent !== null ? 'optimal' : 'infeasible';
 
   return {
     status,

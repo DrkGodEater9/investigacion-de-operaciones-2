@@ -115,7 +115,7 @@
 .pending-plan { font-family: var(--serif); font-size: 16.5px; line-height: 1.5; }
 
 /* Artículo (teoría) */
-.article { max-width: 780px; font-family: var(--serif); font-size: 18px; line-height: 1.65; }
+.article { min-width: 0; max-width: 780px; font-family: var(--serif); font-size: 18px; line-height: 1.65; }
 .article p { margin: 0 0 14px; }
 .article a { color: var(--accent); }
 .article-section { margin-bottom: 30px; }
@@ -131,9 +131,10 @@
 .callout--nota { border-color: var(--rule-strong); border-left-color: var(--accent); }
 .formula-block { text-align: center; font-size: 21px; margin: 16px 0; }
 .figure { margin: 18px 0; border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px 10px; }
-.figure-body { display: grid; justify-items: center; }
+.figure-body { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; }
+.figure-body > * { max-width: 100%; min-width: 0; }
 .figure figcaption { font-family: var(--ui); font-size: 13px; color: var(--muted); margin-top: 8px; border-top: 1px solid var(--rule); padding-top: 8px; }
-.mini-table { border-collapse: collapse; margin: 6px 0 16px; font-size: 16px; }
+.mini-table { border-collapse: collapse; margin: 6px 0 16px; font-size: 16px; display: block; max-width: 100%; overflow-x: auto; }
 .mini-table th { text-align: left; font-family: var(--ui); font-size: 12px; padding: 6px 22px 6px 10px; border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--ink); }
 .mini-table td { padding: 4px 22px 4px 10px; border-bottom: 1px solid var(--rule); }
 .mini-table tbody tr:last-child td { border-bottom: 1.5px solid var(--ink); }
