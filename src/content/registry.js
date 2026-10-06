@@ -22,6 +22,12 @@ export const BUILT = {
     resuelve: lazy(() => import('../topics/entera-pura/Resuelve.jsx')),
     practica: lazy(() => import('../topics/entera-pura/Practica.jsx')),
   },
+  'entera-binaria': {
+    teoria: lazy(() => import('../topics/entera-binaria/Teoria.jsx')),
+    paso: lazy(() => import('../topics/entera-binaria/Paso.jsx')),
+    resuelve: lazy(() => import('../topics/entera-binaria/Resuelve.jsx')),
+    practica: lazy(() => import('../topics/entera-binaria/Practica.jsx')),
+  },
   'entera-mixta': {
     teoria: lazy(() => import('../topics/entera-mixta/Teoria.jsx')),
     paso: lazy(() => import('../topics/entera-mixta/Paso.jsx')),

@@ -1,0 +1,38 @@
+.ps-root { display: flex; flex-direction: column; gap: 16px; padding: 0 0 40px; min-width: 0; }
+.ps-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.ps-head h2 { margin: 0; font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--ink); }
+.ps-tag { font-size: 12px; color: var(--muted); border: 1px solid var(--rule); padding: 2px 8px; border-radius: var(--radius); background: var(--wash); }
+.ps-selectores { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+.ps-modelo { border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ps-modelo p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+.ps-math { font-family: var(--serif); font-size: 16px; line-height: 1.6; overflow-wrap: anywhere; }
+.ps-bar { border: 1px solid var(--rule); border-radius: var(--radius); padding: 10px 14px; display: grid; gap: 8px; background: #fafaf8; }
+.ps-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ps-count { margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 500; }
+.ps-range { width: 100%; accent-color: var(--accent); cursor: pointer; height: 6px; }
+.ps-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.ps-card, .ps-panel { border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.ps-card h3 { margin: 0; font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--ink); }
+.ps-card p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink); }
+.ps-calc { background: #fbfbf9; border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 10px 14px; font-family: var(--serif); font-size: 14.5px; line-height: 1.55; overflow-wrap: anywhere; }
+.ps-panel h4 { margin: 0; font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+.ps-arbol { overflow-x: auto; max-width: 100%; }
+.ps-vacio { margin: 0; font-size: 14px; color: var(--muted); }
+.ps-incumbente { border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 8px 12px; font-family: var(--serif); font-size: 15px; background: #fbfbf9; }
+.ps-incumbente strong { font-family: var(--ui); font-size: 12px; display: block; color: var(--muted); font-weight: 600; }
+.ps-tabla { font-size: 14px; }
+.ps-tabla td, .ps-tabla th { white-space: nowrap; padding-right: 14px; }
+.ps-tabla tr.is-actual td { background: #e8eefb; }
+.ps-tabla tr.is-mejor td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+.ps-tabla .ps-infactible { color: var(--red); }
+.ps-tabla .ps-mejor { color: var(--accent); font-weight: 600; }
+@media (max-width: 760px) {
+  .ps-main { grid-template-columns: minmax(0, 1fr); }
+  .ps-count { margin-left: 0; width: 100%; }
+}
+@media (max-width: 760px) {
+  .ps-controls .icon-btn, .ps-controls .btn { min-height: 36px; }
+  .ps-controls .icon-btn { min-width: 36px; }
+  .ps-selectores .segmented button { min-height: 34px; }
+  .mini-table.ps-tabla td, .mini-table.ps-tabla th { padding-right: 8px; padding-left: 6px; }
+}

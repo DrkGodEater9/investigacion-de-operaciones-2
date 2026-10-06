@@ -52,8 +52,8 @@ export const MODULES = [
         summary: 'Variables que solo toman los valores 0 o 1, para modelar decisiones de sí o no.',
         subtopics: [],
         plan: {
-          paso: 'Modelos clásicos (mochila, selección de proyectos, asignación, costo fijo) y cómo traducir condiciones lógicas («si A entonces B», «máximo k de n») a restricciones.',
-          resuelve: 'Ingresas costos, beneficios y condiciones lógicas, y obtienes la mejor combinación con la enumeración de alternativas.',
+          paso: 'Enumeración de las 2ⁿ combinaciones y método aditivo de Balas (enumeración implícita) animado, nodo por nodo.',
+          resuelve: 'Ingresas costos, beneficios y condiciones lógicas, y obtienes la mejor combinación por enumeración o con el método aditivo de Balas.',
           practica: 'Ejercicios de modelado: dado el enunciado, elegir las restricciones correctas.',
         },
       },

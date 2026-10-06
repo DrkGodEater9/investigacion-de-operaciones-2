@@ -1,12 +1,12 @@
 {
   "name": "io2-estudio",
   "version": "1.0.0",
-  "description": "Investigaci\u00f3n de operaciones II: material de estudio interactivo",
+  "description": "Investigación de operaciones II: material de estudio interactivo",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node src/tools/ruta-critica/test/verify.mjs && node src/tools/entera/test/verify.mjs && node --test src/tools/entera/test/mixta.test.mjs && node --test src/tools/entera/test/practicaMixta.test.mjs && node --test src/tools/entera/test/pasosMixta.test.mjs && node --test src/tools/entera/test/estres.test.mjs"
+    "test": "node src/tools/ruta-critica/test/verify.mjs && node src/tools/entera/test/verify.mjs && node --test src/tools/entera/test/mixta.test.mjs && node --test src/tools/entera/test/practicaMixta.test.mjs && node --test src/tools/entera/test/pasosMixta.test.mjs && node --test src/tools/entera/test/estres.test.mjs && node --test src/tools/entera-binaria/test/dominio.test.js && node --test src/tools/entera-binaria/test/balas.test.js && node --test src/tools/entera-binaria/test/generador.test.js && node --test src/tools/entera-binaria/test/auditoria.test.js && node --test src/tools/entera-binaria/test/auditoriaGenerador.test.js && node --test src/tools/entera-binaria/test/auditoriaExportar.test.js"
   },
   "author": "",
   "license": "ISC",

@@ -1,0 +1,89 @@
+/* Resuelve el tuyo (tema 1.3). Solo lo que base.css no trae; variables de base.css. */
+.eb-solver { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; min-width: 0; }
+.eb-panel { border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; min-width: 0; }
+.eb-cuerpo { padding: 14px 16px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+.eb-panel > .eb-cuerpo { padding-top: 14px; }
+.eb-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
+.eb-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.eb-bloque { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; }
+.eb-nota { margin: 0; font-size: 12.5px; color: var(--muted); }
+.eb-enunciado { margin-top: -4px; }
+.eb-etiqueta { font-size: 13px; font-weight: 600; }
+.eb-cab { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; border-bottom: 1px solid var(--rule); padding-bottom: 10px; }
+.eb-sub { font-family: var(--serif); font-size: 17px; margin: 6px 0 0; }
+
+/* Entradas */
+.eb-in, .eb-sel, .eb-textarea { border: 1px solid var(--rule-strong); border-radius: var(--radius); background: #fff; font-size: 13px; }
+.eb-in { height: 30px; padding: 0 6px; min-width: 0; }
+.eb-in:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.eb-in--num { width: 58px; text-align: right; font-variant-numeric: tabular-nums; }
+.eb-in--nombre { width: 58px; text-align: center; font-family: var(--serif); font-weight: 600; }
+.eb-in--restr { width: 150px; }
+.eb-in--k { width: 56px; height: 28px; }
+.eb-sel { height: 30px; padding: 0 26px 0 8px; background-position: calc(100% - 13px) 12px, calc(100% - 8px) 12px; }
+.eb-sel--op { padding: 0 24px 0 8px; font-weight: 600; }
+.eb-textarea { width: 100%; padding: 8px 10px; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; line-height: 1.45; resize: vertical; }
+
+/* Tablas */
+.eb-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; }
+.eb-tabla { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+.eb-tabla th { background: var(--wash); text-align: center; font-size: 12px; font-weight: 600; padding: 5px 7px; border-bottom: 1px solid var(--ink); white-space: nowrap; }
+.eb-tabla td { padding: 4px 7px; border-bottom: 1px solid var(--rule); text-align: center; white-space: nowrap; }
+.eb-tabla tr:last-child td { border-bottom: 0; }
+.eb-tabla--editor td:first-child { text-align: left; }
+.eb-tabla--datos td:first-child { text-align: left; }
+.eb-celda-nota { color: var(--muted); font-size: 12px; text-align: left !important; }
+.eb-mono { font-family: ui-monospace, Consolas, monospace; letter-spacing: .05em; }
+.eb-tabla td.eb-holguras { white-space: normal; min-width: 140px; max-width: 340px; text-align: left; }
+.eb-tabla tr.is-optima td { background: var(--accent-wash); color: var(--accent); font-weight: 700; }
+.eb-tabla tr.is-factible td:first-child { color: var(--accent); font-weight: 700; }
+.eb-bad { color: var(--red); }
+.eb-tabla tr.is-optima td.eb-bad { color: var(--red); }
+
+/* Condiciones lógicas */
+.eb-logica { border: 1px solid var(--rule); border-radius: var(--radius); }
+.eb-logica summary { cursor: pointer; padding: 8px 12px; font-weight: 600; font-size: 13px; }
+.eb-logica-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 4px 12px 12px; }
+.eb-vars { border: 1px solid var(--rule); border-radius: var(--radius); margin: 0; padding: 6px 10px 8px; display: flex; flex-wrap: wrap; gap: 4px 14px; min-width: 0; }
+.eb-vars legend { font-size: 12px; color: var(--muted); padding: 0 4px; }
+.eb-check { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-family: var(--serif); cursor: pointer; }
+.eb-error { color: var(--red); font-size: 13px; }
+
+/* Resultados */
+.eb-modelo { font-family: var(--serif); font-size: 16px; line-height: 1.55; border-left: 2px solid var(--ink); padding: 2px 0 2px 14px; overflow-x: auto; max-width: 100%; }
+.eb-modelo ul { list-style: none; margin: 0; padding: 0 0 0 18px; }
+.eb-resultado { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }
+.eb-estado { margin: 0; font-family: var(--serif); }
+.eb-estado p { margin: 2px 0; }
+.eb-estado-z { font-size: 20px; font-weight: 600; }
+.eb-estado--mal { color: var(--red); font-weight: 600; }
+.eb-lista { margin: 2px 0; padding-left: 20px; }
+.eb-conteo { margin: 0; font-size: 13.5px; }
+.eb-aviso { margin: 0; padding: 7px 10px; border: 1px solid var(--rule-strong); border-left: 3px solid var(--accent); border-radius: var(--radius); font-size: 13px; background: var(--accent-wash); }
+.eb-aviso--mal { border-left-color: var(--red); background: var(--red-wash); }
+.eb-errores { border: 1px solid var(--red); border-radius: var(--radius); background: var(--red-wash); color: var(--red); padding: 10px 14px; font-size: 13.5px; }
+.eb-errores ul { margin: 6px 0 0; padding-left: 20px; }
+.eb-actualizando { opacity: .55; }
+.eb-pager { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+.eb-arbol { padding: 8px; }
+.arbol-aviso { margin: 8px; font-size: 13px; color: var(--muted); }
+
+/* Plantilla */
+.eb-codigo { border: 1px solid var(--rule); border-radius: var(--radius); min-width: 0; }
+.eb-codigo-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--rule); background: var(--wash); font-size: 13px; font-weight: 600; }
+.eb-pre { margin: 0; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; line-height: 1.5; }
+
+.segmented button:disabled { opacity: .4; cursor: not-allowed; }
+@media (max-width: 520px) {
+  .eb-cuerpo { padding: 12px; }
+  .eb-in--restr { width: 120px; }
+  .eb-pager { margin-left: 0; }
+}
+.eb-fila .inline-field { min-width: 0; max-width: 100%; }
+.eb-fila .inline-field select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
+/* Los elementos absolutos ocultos (sr-only, casillas del Toggle) quedan dentro de su contenedor y no ensanchan la página. */
+.eb-scroll, .eb-solver .toggle, .eb-codigo { position: relative; }
+/* Tabla de resultados larga: se desplaza dentro de su caja en vez de alargar la página. */
+.eb-resultado .eb-scroll { max-height: 70vh; overflow: auto; }
+.eb-resultado .eb-tabla th { position: sticky; top: 0; z-index: 1; }
+@media (max-width: 760px) { .eb-solver .btn { min-height: 34px; } }
