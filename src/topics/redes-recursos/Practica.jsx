@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, useCallback } from 'react';
+import { filtrar } from '@/shared/campos.js';
 import { TIPOS, ETIQUETAS, generarEjercicio, corregir } from '@/tools/recursos/domain/generador.js';
 import Ejercicio, { Retroalimentacion, respuestaLista, respuestaParaCorregir } from '@/tools/recursos/components/Ejercicio.jsx';
 import Segmented from '@/ui/Segmented.jsx';
@@ -61,7 +62,7 @@ export default function Practica() {
       <div className="rc-pr-barra">
         <form className="inline-field" onSubmit={usarSemilla}>
           <label htmlFor="rc-semilla">Repetir semilla</label>
-          <input id="rc-semilla" inputMode="numeric" value={entradaSemilla} onChange={(e) => setEntradaSemilla(e.target.value)} placeholder="4821" />
+          <input id="rc-semilla" inputMode="numeric" autoComplete="off" spellCheck={false} value={entradaSemilla} onChange={(e) => setEntradaSemilla(filtrar.semilla(e.target.value))} placeholder="4821" />
           <button type="submit" className="btn btn--sm">Ir</button>
         </form>
         <span className="rc-pr-sesion" aria-live="polite">Correctas: {sesion.a} de {sesion.b}</span>

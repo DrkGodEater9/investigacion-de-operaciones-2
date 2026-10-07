@@ -1,3 +1,4 @@
+import { filtrar } from '@/shared/campos.js';
 import { EXAMPLES } from '../domain/examples.js';
 
 /** Título del ejercicio, selector de ejemplos y botón de ejercicio nuevo. */
@@ -7,7 +8,8 @@ export default function SolverHeader({ project, dispatch }) {
       <input
         className="title-input"
         value={project.title}
-        onChange={(e) => dispatch({ type: 'title', value: e.target.value })}
+        autoComplete="off"
+        onChange={(e) => dispatch({ type: 'title', value: filtrar.texto1(e.target.value) })}
         aria-label="Título del ejercicio"
       />
       <div className="header-actions">

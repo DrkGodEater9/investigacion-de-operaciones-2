@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, useCallback } from 'react';
 import { TIPOS, TIPOS_ETIQUETA, generar, corregir, tipoDeMezcla } from '../domain/practicaMixta.js';
 import { frac } from '../domain/fraction.js';
+import { filtrar, propsNumero, propsEntero } from '@/shared/campos.js';
 import Segmented from '@/ui/Segmented.jsx';
 import StatusMark from '@/ui/StatusMark.jsx';
 import Toast from '@/ui/Toast.jsx';
@@ -138,7 +139,7 @@ export default function PracticaMixta({ temaId = 'entera-mixta' }) {
         <button type="button" className="btn" onClick={() => nuevo()}>Ejercicio nuevo</button>
         <form className="inline-field" onSubmit={usarSemilla}>
           <label htmlFor="pm-semilla">Repetir semilla</label>
-          <input id="pm-semilla" inputMode="numeric" value={entradaSemilla} onChange={(e) => setEntradaSemilla(e.target.value)} placeholder="4821" />
+          <input id="pm-semilla" {...propsEntero} value={entradaSemilla} onChange={(e) => setEntradaSemilla(filtrar.semilla(e.target.value))} placeholder="4821" />
           <button type="submit" className="btn btn--sm">Ir</button>
         </form>
         <span className="pm-sesion" aria-live="polite">Sesión: {sesion.aciertos} aciertos de {sesion.intentos} intentos</span>
@@ -175,10 +176,11 @@ export default function PracticaMixta({ temaId = 'entera-mixta' }) {
                     <input
                       id={`pm-${c.id}`}
                       type="text"
+                      {...propsNumero}
                       inputMode={c.tipo === 'fraccion' ? 'text' : 'decimal'}
-                      autoComplete="off"
+
                       value={resp[c.id] ?? ''}
-                      onChange={(e) => poner(c.id, e.target.value)}
+                      onChange={(e) => poner(c.id, filtrar.decimal(e.target.value, { negativo: true, fraccion: true }))}
                       aria-describedby={d ? `pm-res-${c.id}` : undefined}
                       aria-invalid={d ? !d.ok : undefined}
                     />

@@ -42,10 +42,13 @@ function cortaCSV(linea, delim) {
 
 const NADA = new Set(['', '-', '--', '---', '—', '–', 'ninguna', 'ninguno', 'n/a', 'na', 'inicio', 'none']);
 const celda = (c) => (NADA.has(quita(c)) ? '' : String(c).trim());
-const numero = (c) => {
-  const t = celda(c);
+const numero = (c, notas) => {
+  const t = celda(c).replace(/^\$\s*|\s*\$$/g, '');
   if (t === '') return '';
   const n = toNumber(t);
+  if (n != null && notas && /^\d{1,3}([.,]\d{3})+$/.test(t)) {
+    notas.push(`«${t}» se leyó como ${n}. Si es un número con separador de miles, escríbelo sin separador (por ejemplo 1000).`);
+  }
   return n == null ? t : String(n);
 };
 
@@ -61,10 +64,10 @@ export function leerTexto(texto) {
     if (!linea) continue;
     if (/^#{1,6}\s+/.test(linea)) { if (!titulo) titulo = linea.replace(/^#+\s+/, ''); continue; }
     const q = quita(linea);
-    const m = q.match(/^(?:[-*]\s*)?costos?\s+indirectos?\s*(fijos?|por\s+(?:unidad|dia|semana|mes|periodo|dia)[^:=]*|\/\s*\w+)?\s*[:=]\s*\$?\s*([-+]?[\d.,]+)/);
+    const m = q.match(/^(?:[-*]\s*)?costos?\s+(indirectos?|fijos?)([^:=|]*?)\s*[:=]\s*\$?\s*([-+]?[\d.,]+)/);
     if (m && !linea.includes('|')) {
-      const valor = String(toNumber(m[2]) ?? m[2]);
-      if (m[1] && /^fij/.test(m[1])) fijo = valor; else ci = valor;
+      const valor = String(toNumber(m[3]) ?? m[3]);
+      if (/^fij/.test(m[1]) || /fij/.test(m[2])) fijo = valor; else ci = valor;
       continue;
     }
     cuerpo.push(cruda);
@@ -112,10 +115,10 @@ export function leerTexto(texto) {
     .map((r) => ({
       name: String(r[cols.name] ?? '').trim(),
       preds: splitPreds(r[cols.preds]).join(','),
-      dn: numero(r[cols.dn]),
-      cn: numero(r[cols.cn]),
-      dl: numero(r[cols.dl]),
-      cl: numero(r[cols.cl]),
+      dn: numero(r[cols.dn], notas),
+      cn: numero(r[cols.cn], notas),
+      dl: numero(r[cols.dl], notas),
+      cl: numero(r[cols.cl], notas),
     }));
   return { titulo, ci, fijo, filas: salida, notas };
 }

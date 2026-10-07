@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { modelToMarkdown } from '../../domain/parser.js';
 import { copyText } from '@/shared/files.js';
 
+const MAX_MD = 20000;
+
 export function MarkdownInput({ model, onApplyMarkdown, notify }) {
   const [text, setText] = useState('');
 
@@ -50,7 +52,8 @@ export function MarkdownInput({ model, onApplyMarkdown, notify }) {
           rows={12}
           spellCheck={false}
           aria-label="Editor de Markdown del modelo"
-          onChange={(e) => setText(e.target.value)}
+          maxLength={MAX_MD}
+          onChange={(e) => setText(e.target.value.slice(0, MAX_MD))}
         />
       </div>
     </div>

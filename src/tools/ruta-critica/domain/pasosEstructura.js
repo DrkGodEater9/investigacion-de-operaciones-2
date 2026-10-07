@@ -183,7 +183,7 @@ export function pasosConstruccion(acts) {
     let texto;
     if (!entradas.length) texto = 'Evento inicial: no le llega ninguna flecha, así que recibe el número 1.';
     else {
-      texto = `Al evento le llegan flechas desde ${lista(prev.map((x) => `el ${x}`))}, que ya están numerados. Recibe el ${k}, mayor que todos ellos.`;
+      texto = `Al evento ${prev.length > 1 ? 'le llegan flechas desde' : 'le llega una flecha desde'} ${lista(prev.map((x) => `el ${x}`))}, que ${prev.length > 1 ? 'ya están numerados' : 'ya está numerado'}. Recibe el ${k}, mayor que ${prev.length > 1 ? 'todos ellos' : 'él'}.`;
       if (k === n) texto += ' Es el evento final: no sale ninguna flecha de él.';
     }
     pasos.push({

@@ -6,7 +6,7 @@
  * En un nodo de azar de dos ramas esto es simplemente p y 1 − p.
  */
 import { listaNodos } from './arbol.js';
-import { evaluar, firmaEstrategia } from './evaluar.js';
+import { evaluar } from './evaluar.js';
 
 const clonar = (x) => JSON.parse(JSON.stringify(x));
 
@@ -50,7 +50,18 @@ export function conProbabilidad(arbol, nodoId, idx, p, tambien = []) {
   return copia;
 }
 
-const textoEstrategia = (ev) => (ev.estrategia.length ? ev.estrategia.map((e) => e.eleccion).join(' / ') : '(sin decisiones)');
+/**
+ * Elección de TODAS las decisiones del árbol (también las que dejan de alcanzarse cuando p = 0 o p = 1).
+ * Así llegar o dejar de llegar a una decisión por un extremo de p no se confunde con un cambio de estrategia.
+ */
+const elecciones = (arbol, ev) => listaNodos(arbol)
+  .filter((n) => n.tipo === 'decision')
+  .map((n) => ({ id: n.id, idx: ev.porNodo[n.id].elegida, eleccion: n.ramas[ev.porNodo[n.id].elegida].etiqueta }));
+const firmaDe = (arbol, ev) => elecciones(arbol, ev).map((e) => `${e.id}:${e.idx}`).join('|');
+const textoDe = (arbol, ev) => {
+  const l = elecciones(arbol, ev);
+  return l.length ? l.map((e) => e.eleccion).join(' / ') : '(sin decisiones)';
+};
 
 /**
  * Barrido de p en [0, 1].
@@ -77,7 +88,7 @@ export function sensibilidad(arbol, nodoId, idx, { pasos = 100, ligar = false } 
     evs.push(evalEn(p));
   }
   const valores = evs.map((e) => e.valor);
-  const firmas = evs.map(firmaEstrategia);
+  const firmas = evs.map((e) => firmaDe(arbol, e));
 
   let series = null;
   const raiz = arbol.raiz;
@@ -93,10 +104,10 @@ export function sensibilidad(arbol, nodoId, idx, { pasos = 100, ligar = false } 
     const fLo = firmas[i];
     for (let k = 0; k < 60; k++) {
       const mid = (lo + hi) / 2;
-      if (firmaEstrategia(evalEn(mid)) === fLo) lo = mid; else hi = mid;
+      if (firmaDe(arbol, evalEn(mid)) === fLo) lo = mid; else hi = mid;
     }
     const p = (lo + hi) / 2;
-    cortes.push({ p, valor: evalEn(p).valor, antes: textoEstrategia(evs[i]), despues: textoEstrategia(evs[i + 1]) });
+    cortes.push({ p, valor: evalEn(p).valor, antes: textoDe(arbol, evs[i]), despues: textoDe(arbol, evs[i + 1]) });
   }
 
   const tramos = [];
@@ -105,7 +116,7 @@ export function sensibilidad(arbol, nodoId, idx, { pasos = 100, ligar = false } 
     tramos.push({ desde, hasta: c.p, estrategia: c.antes });
     desde = c.p;
   });
-  tramos.push({ desde, hasta: 1, estrategia: textoEstrategia(evs[pasos]) });
+  tramos.push({ desde, hasta: 1, estrategia: textoDe(arbol, evs[pasos]) });
 
   return { nodoId, ligados: tambien.length > 1 ? tambien : [], nombreNodo: nodo.nombre, rama: idx, etiqueta: nodo.ramas[idx].etiqueta, p0, ps, valores, series, cortes, tramos };
 }

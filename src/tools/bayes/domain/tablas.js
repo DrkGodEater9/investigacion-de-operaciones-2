@@ -110,7 +110,10 @@ export function tablaResumen(p, a, f = fmtNum) {
   if (a.muestral) {
     rows.push([`${NOTACION.vecim} (${NOTACION.vecimLargo})`, f(a.muestral.vecim)]);
     rows.push([`${NOTACION.veim} (${NOTACION.veimLargo})`, f(a.muestral.veim)]);
-    rows.push([`${NOTACION.eficiencia} (${NOTACION.veim} / ${NOTACION.veip})`, a.muestral.eficiencia === null ? 'No definida (VEIP = 0)' : fmtPct(a.muestral.eficiencia)]);
+    const ef = a.muestral.eficiencia;
+    // En pantalla/PDF/Markdown, «46,4 %»; en el CSV (f = crudo) el número lleva punto decimal, como el resto.
+    const efTexto = ef === null ? 'No definida (VEIP = 0)' : f === fmtNum ? fmtPct(ef) : `${f(ef * 100)} %`;
+    rows.push([`${NOTACION.eficiencia} (${NOTACION.veim} / ${NOTACION.veip})`, efTexto]);
   }
   return { id: 'resumen', titulo: 'Resumen de valores', headers: ['Medida', 'Valor'], rows, resaltar: [], totales: 0 };
 }

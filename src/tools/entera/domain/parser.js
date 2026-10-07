@@ -40,8 +40,46 @@ export function modelToMarkdown(model, title = 'Modelo de Programación Entera')
   ].join('\n');
 }
 
+/** Máximo de variables que admite la herramienta. */
+export const MAX_VARS_PARSER = 4;
+
+/** Celdas de una fila de tabla Markdown, conservando las vacías (así no se corren las columnas). */
+const celdasDe = (linea) => linea.split('|').slice(1, -1).map((c) => c.trim());
+
+/** Detecta el sentido: primero la línea «Sentido: …»; si no, la primera línea de texto (no título ni tabla) que lo nombre. */
+function detectarSentido(lines) {
+  const palabra = (txt) => {
+    const low = txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (/\b(minimizar|minimiza|minimo|min)\b/.test(low)) return 'min';
+    if (/\b(maximizar|maximiza|maximo|max)\b/.test(low)) return 'max';
+    return null;
+  };
+  for (const l of lines) {
+    const m = /^sentido\s*:\s*(.*)$/i.exec(l);
+    if (m) {
+      const r = palabra(m[1]);
+      if (r) return r;
+    }
+  }
+  for (const l of lines) {
+    if (l.startsWith('#') || l.startsWith('|') || /^enteras?\s*:/i.test(l)) continue;
+    const r = palabra(l);
+    if (r) return r;
+  }
+  return 'max';
+}
+
+function leerOperador(raw) {
+  const r = raw.trim();
+  if (r.includes('<=') || r.includes('≤') || r.includes('=<') || r === '<') return '<=';
+  if (r.includes('>=') || r.includes('≥') || r.includes('=>') || r === '>') return '>=';
+  if (r.includes('=')) return '=';
+  return '<=';
+}
+
 /**
  * Parsea un texto o tabla Markdown hacia el modelo de programación entera.
+ * Devuelve null si no hay una tabla utilizable, si hay más de ${MAX_VARS_PARSER} variables o si no hay restricciones.
  */
 export function parseModelFromMarkdown(text) {
   if (!text || typeof text !== 'string') return null;
@@ -49,18 +87,7 @@ export function parseModelFromMarkdown(text) {
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
   if (lines.length === 0) return null;
 
-  let sense = 'max';
-  for (const l of lines) {
-    const low = l.toLowerCase();
-    if (low.includes('min') || low.includes('minimizar')) {
-      sense = 'min';
-      break;
-    }
-    if (low.includes('max') || low.includes('maximizar')) {
-      sense = 'max';
-      break;
-    }
-  }
+  const sense = detectarSentido(lines);
 
   // Línea opcional «Enteras: x1, x3» (el resto son continuas). Sin ella, todas son enteras.
   let enterasDeclaradas = null;
@@ -73,95 +100,70 @@ export function parseModelFromMarkdown(text) {
   }
 
   // Filtrar filas de tabla Markdown (las que empiezan y terminan con |)
-  const tableLines = lines.filter((l) => l.startsWith('|') && l.endsWith('|'));
-  if (tableLines.length >= 2) {
-    // Primera fila con encabezados
-    const headerCells = tableLines[0]
-      .split('|')
-      .map((c) => c.trim())
-      .filter(Boolean);
+  const tableLines = lines.filter((l) => l.startsWith('|') && l.endsWith('|') && l.length > 1);
+  if (tableLines.length < 2) return null;
 
-    // Detectar columnas de variables x1, x2...
-    const varIndices = [];
-    let opIndex = -1;
-    let bIndex = -1;
+  // Encabezado: la primera fila con celdas x1..xn, Op o b. Sin encabezado, todas las filas son datos.
+  const esEncabezado = (cells) => cells.some((h) => /^(x\d+|op|signo|b|rhs)$/i.test(h));
+  const hayEncabezado = esEncabezado(celdasDe(tableLines[0]));
+  const headerCells = hayEncabezado ? celdasDe(tableLines[0]) : [];
 
-    headerCells.forEach((h, idx) => {
-      const low = h.toLowerCase();
-      if (/^x\d+$/i.test(low)) {
-        varIndices.push({ name: low, col: idx });
-      } else if (low === 'op' || low === 'signo') {
-        opIndex = idx;
-      } else if (low === 'b' || low === 'rhs') {
-        bIndex = idx;
-      }
-    });
+  const varIndices = [];
+  let opIndex = -1;
+  let bIndex = -1;
+  headerCells.forEach((h, idx) => {
+    const low = h.toLowerCase();
+    if (/^x\d+$/.test(low)) varIndices.push({ name: low, col: idx });
+    else if (low === 'op' || low === 'signo') opIndex = idx;
+    else if (low === 'b' || low === 'rhs') bIndex = idx;
+  });
 
-    // Si no se nombraron explícitamente como x1..xn, asumir columnas del medio
-    if (varIndices.length === 0) {
-      // Formato: [Tipo, c1, c2, ..., Op, b]
-      const nVars = Math.max(2, headerCells.length - 3);
-      for (let j = 0; j < nVars; j++) {
-        varIndices.push({ name: `x${j + 1}`, col: j + 1 });
-      }
-      opIndex = headerCells.length - 2;
-      bIndex = headerCells.length - 1;
-    }
+  const filasDatos = tableLines.slice(hayEncabezado ? 1 : 0).filter((l) => !/^\|[\s\-:|]+\|$/.test(l));
 
-    const numVars = Math.min(4, Math.max(2, varIndices.length));
-    let c = Array(numVars).fill('0');
-    const constraints = [];
-
-    // Recorrer filas de datos (saltando separador |---|)
-    for (let r = 1; r < tableLines.length; r++) {
-      const rowLine = tableLines[r];
-      if (/^\|[\s\-:|]+\|$/.test(rowLine)) continue; // línea de guiones
-
-      const cells = rowLine
-        .split('|')
-        .map((c) => c.trim())
-        .filter(Boolean);
-
-      if (cells.length < 2) continue;
-
-      const type = cells[0].toLowerCase();
-      if (type.includes('fo') || type.includes('z') || type.includes('obj')) {
-        // Función objetivo
-        for (let j = 0; j < numVars; j++) {
-          const colIdx = varIndices[j].col;
-          c[j] = cells[colIdx] || '0';
-        }
-      } else {
-        // Restricción
-        const a = [];
-        for (let j = 0; j < numVars; j++) {
-          const colIdx = varIndices[j].col;
-          a.push(cells[colIdx] || '0');
-        }
-        let op = '<=';
-        if (opIndex >= 0 && cells[opIndex]) {
-          const rawOp = cells[opIndex].trim();
-          if (rawOp.includes('<=') || rawOp.includes('≤') || rawOp === '<') op = '<=';
-          else if (rawOp.includes('>=') || rawOp.includes('≥') || rawOp === '>') op = '>=';
-          else if (rawOp.includes('=')) op = '=';
-        }
-        const b = (bIndex >= 0 && cells[bIndex]) ? cells[bIndex] : '0';
-        constraints.push({ a, op, b });
-      }
-    }
-
-    return {
-      sense,
-      numVars,
-      c,
-      constraints: constraints.length > 0 ? constraints : [
-        { a: Array(numVars).fill('1'), op: '<=', b: '10' }
-      ],
-      integer: Array.from({ length: numVars }, (_, j) =>
-        enterasDeclaradas ? enterasDeclaradas.has(`x${j + 1}`) : true
-      ),
-    };
+  // Sin nombres x1..xn: formato [Tipo, c1, ..., cn, Op, b]
+  if (varIndices.length === 0) {
+    const anchoMax = Math.max(0, ...filasDatos.map((l) => celdasDe(l).length));
+    const nVars = Math.max(1, (hayEncabezado ? headerCells.length : anchoMax) - 3);
+    for (let j = 0; j < nVars; j++) varIndices.push({ name: `x${j + 1}`, col: j + 1 });
+    const ancho = hayEncabezado ? headerCells.length : anchoMax;
+    opIndex = ancho - 2;
+    bIndex = ancho - 1;
   }
 
-  return null;
+  if (varIndices.length > MAX_VARS_PARSER) return null;
+  const numVars = Math.max(2, varIndices.length);
+  const celda = (cells, j) => {
+    const v = varIndices[j] ? cells[varIndices[j].col] : undefined;
+    return v ? v : '0';
+  };
+
+  let c = Array(numVars).fill('0');
+  const constraints = [];
+
+  for (const rowLine of filasDatos) {
+    const cells = celdasDe(rowLine);
+    if (cells.length < 2) continue;
+
+    const type = cells[0].toLowerCase();
+    if (type.includes('fo') || type.includes('z') || type.includes('obj')) {
+      c = Array.from({ length: numVars }, (_, j) => celda(cells, j));
+    } else {
+      const a = Array.from({ length: numVars }, (_, j) => celda(cells, j));
+      const op = opIndex >= 0 && cells[opIndex] ? leerOperador(cells[opIndex]) : '<=';
+      const b = bIndex >= 0 && cells[bIndex] ? cells[bIndex] : '0';
+      constraints.push({ a, op, b });
+    }
+  }
+
+  if (constraints.length === 0) return null;
+
+  return {
+    sense,
+    numVars,
+    c,
+    constraints,
+    integer: Array.from({ length: numVars }, (_, j) =>
+      enterasDeclaradas ? enterasDeclaradas.has(`x${j + 1}`) : true
+    ),
+  };
 }

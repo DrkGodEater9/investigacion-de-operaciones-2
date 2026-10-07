@@ -11,7 +11,9 @@
  *     Así ninguna precedencia se rompe y el proyecto sigue terminando en T.
  *  4. Para cada comienzo s de la ventana se mide la carga que ya existe donde la actividad quedaría:
  *       c(s) = Σ_k r_k · Σ_{t ocupado} uso_k(t)      (sin contar la propia actividad)
- *     La actividad se mueve al s de menor c(s) solo si es estrictamente menor que el c de su comienzo actual;
+ *     Se descarta todo comienzo que haría subir el pico de algún recurso por encima del pico que hay en ese momento
+ *     (así la nivelación nunca deja un pico mayor que el del cronograma temprano). Esos comienzos llevan sube = true.
+ *     La actividad se mueve al s permitido de menor c(s) solo si es estrictamente menor que el c de su comienzo actual;
  *     si varios s empatan en el mínimo, se elige el más temprano. Si no mejora, se queda.
  *  5. Se repiten pasadas hasta que una no mueva nada. Cada movimiento baja Σ uso² (un entero), así que termina.
  */
@@ -42,20 +44,31 @@ export function nivelar(red, opciones = {}) {
       if (hi <= lo) continue;
       // se retira la actividad del histograma para medir la carga de los demás
       for (let t = starts[a]; t < starts[a] + d[a]; t++) for (let k = 0; k < K; k++) uso[k][t] -= red.r[a][k];
+      // pico de cada recurso con la actividad en su lugar actual: ningún comienzo puede superarlo
+      const topes = [];
+      for (let k = 0; k < K; k++) {
+        let m = 0;
+        for (let t = 0; t < uso[k].length; t++) m = Math.max(m, uso[k][t] + (t >= starts[a] && t < starts[a] + d[a] ? red.r[a][k] : 0));
+        topes.push(m);
+      }
       const costos = [];
       for (let s = lo; s <= hi; s++) {
         let c = 0;
+        let sube = false;
         for (let k = 0; k < K; k++) {
           let suma = 0;
-          for (let t = s; t < s + d[a]; t++) suma += uso[k][t];
+          for (let t = s; t < s + d[a]; t++) {
+            suma += uso[k][t];
+            if (uso[k][t] + red.r[a][k] > topes[k]) sube = true;
+          }
           c += red.r[a][k] * suma;
         }
-        costos.push({ s, costo: c });
+        costos.push({ s, costo: c, sube });
       }
       const actual = costos.find((x) => x.s === starts[a]).costo;
-      let mejor = costos[0];
-      for (const x of costos) if (x.costo < mejor.costo) mejor = x;
-      const elegido = mejor.costo < actual ? mejor.s : starts[a];
+      let mejor = null;
+      for (const x of costos) if (!x.sube && (mejor == null || x.costo < mejor.costo)) mejor = x;
+      const elegido = mejor && mejor.costo < actual ? mejor.s : starts[a];
       const antes = starts[a];
       starts[a] = elegido;
       for (let t = starts[a]; t < starts[a] + d[a]; t++) for (let k = 0; k < K; k++) uso[k][t] += red.r[a][k];

@@ -1,3 +1,4 @@
+import { filtrar } from '@/shared/campos.js';
 /** Texto de una opción: en 'modelar' son objetos { texto }, en los demás tipos cadenas. */
 const textoOpcion = (o) => (o && typeof o === 'object' ? o.texto : o);
 
@@ -35,11 +36,13 @@ export default function ControlRespuesta({ ej, resp, onChange, bloqueado }) {
           type="text"
           inputMode="decimal"
           autoComplete="off"
+          spellCheck={false}
+
           value={resp ?? ''}
           disabled={bloqueado}
           aria-invalid={invalido || undefined}
           aria-describedby={invalido ? `${nombre}-ayuda` : undefined}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(filtrar.decimal(e.target.value, { negativo: true }))}
         />
         {invalido && <span id={`${nombre}-ayuda`} className="pb-ayuda">Escribe un número, por ejemplo 12 o 12,5.</span>}
       </div>

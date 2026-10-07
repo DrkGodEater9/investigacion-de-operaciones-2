@@ -1,6 +1,7 @@
 import { fmtNum } from '../domain/formato.js';
 import { tablaVerosimilitud } from '../domain/tablas.js';
 import TablaDatos from './TablaDatos.jsx';
+import { filtrar, propsNumero } from '@/shared/campos.js';
 
 /** Interpreta un campo numérico: acepta punto o coma decimal y «−»; null si no es un número. */
 export function parseNumero(t) {
@@ -32,13 +33,13 @@ function ControlRespuesta({ ej, resp, onChange, bloqueado }) {
         <input
           id={`${nombre}-n`}
           type="text"
-          inputMode="decimal"
-          autoComplete="off"
+          {...propsNumero}
+         
           value={resp ?? ''}
           disabled={bloqueado}
           aria-invalid={invalido || undefined}
           aria-describedby={invalido ? `${nombre}-ayuda` : undefined}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(filtrar.decimal(e.target.value, { negativo: true }))}
         />
         {invalido && <span id={`${nombre}-ayuda`} className="bz-pr-ayuda">Escribe un número, por ejemplo 12 o 12,5.</span>}
       </div>

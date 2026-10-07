@@ -93,7 +93,7 @@ export const TRUE_FALSE_BANK = [
       'Si al redondear la relajación lineal hacia abajo se obtiene un punto factible, este punto siempre coincide con el óptimo entero.',
     isTrue: false,
     explanation:
-      'Falso. Aunque redondear hacia abajo suele ser factible cuando todas las restricciones son de tipo ≤ con coeficientes positivos, casi nunca es óptimo. En el ejemplo de Teoría, redondear (3,75; 1,25) hacia abajo da (3, 1) con Z = 19, mientras que el óptimo entero real es (3, 2) con Z = 23.',
+      'Falso. Aunque redondear hacia abajo suele ser factible cuando todas las restricciones son de tipo ≤ con coeficientes positivos, no tiene por qué ser óptimo. En el ejemplo de Teoría, redondear (3,75; 1,25) hacia abajo da (3, 1) con Z = 19, mientras que el óptimo entero real es (3, 2) con Z = 23.',
   },
   {
     id: 'tf-poda-piso',
@@ -133,7 +133,7 @@ export const TRUE_FALSE_BANK = [
       'El óptimo de un problema de programación entera pura siempre coincide con alguno de los vértices extremos de la región factible relajada.',
     isTrue: false,
     explanation:
-      'Falso. La región factible entera no es un poliedro continuo sino una retícula de puntos aislados. En general, los vértices del poliedro continuo son fraccionarios, y el óptimo entero suele ubicarse en el interior o en aristas del poliedro, no en sus vértices extremos.',
+      'Falso. La región factible entera no es un poliedro continuo sino una retícula de puntos aislados. Los vértices del poliedro continuo suelen ser fraccionarios (en el ejemplo de Teoría, (3,75; 1,25)), y el óptimo entero (3, 2) queda en el interior de la región, no en uno de sus vértices; por eso no basta con recorrer los vértices como en el simplex.',
   },
   {
     id: 'tf-franja-descartada',

@@ -1,7 +1,7 @@
 import { ZERO, ONE, frac } from './fraction.js';
 import { bmATexto } from './tablero.js';
 import { planosDeCorte } from './cortes.js';
-import { solveIP } from './branchAndBound.js';
+import { solveIP, canUseFloorPruning } from './branchAndBound.js';
 import { get2DFeasibleRegion } from './geometry.js';
 
 /**
@@ -149,14 +149,15 @@ export function pasosCortes(modelo, { conContinuacionPura = false } = {}) {
   const dosVars = n === 2;
 
   const res = planosDeCorte(m, { tipo: 'mixto' });
-  if (res.estado === 'infactible' || res.estado === 'no_acotado' || !res.lp || res.lp.estado !== 'optimo') {
+  if (!res.lp || res.lp.estado !== 'optimo') {
+    const estLp = res.lp ? res.lp.estado : res.estado;
     return [
       {
         id: 1,
         titulo: '1. Sin solución para la relajación',
         queHago: 'Se resuelve la relajación lineal con el simplex.',
         porQue: 'Si la relajación no tiene óptimo, el problema entero tampoco lo tiene por este camino.',
-        calculo: [`Estado de la relajación: ${res.lp ? res.lp.estado : res.estado}`],
+        calculo: [`Estado de la relajación: ${estLp === 'infactible' ? 'infactible (región factible vacía)' : estLp === 'no_acotado' ? 'no acotada' : estLp}`],
         vista: { tipo: 'texto' },
       },
     ];
@@ -397,9 +398,15 @@ export function pasosCortes(modelo, { conContinuacionPura = false } = {}) {
   });
   pasos.push(
     pasoTablero({
-      titulo: 'Tablero tras la iteración dual',
-      queHago: `Ya no hay b negativos: ${tDual.base.map((j, i) => `${tDual.cols[j].nombre} = ${t(tDual.b[i])}`).join(', ')}; Z = ${bmATexto(tDual.zval)}.`,
-      porQue: 'Con todos los b no negativos y los Cj−Zj de signo óptimo, el tablero es óptimo para el problema con el corte.',
+      titulo: d.estado === 'infactible' ? 'El dual no tiene columna de entrada' : 'Tablero tras la iteración dual',
+      queHago:
+        d.estado === 'infactible'
+          ? `Queda una fila con b negativo (${tDual.base.map((j, i) => (tDual.b[i].lt(ZERO) ? `${tDual.cols[j].nombre} = ${t(tDual.b[i])}` : null)).filter(Boolean).join(', ')}) y ninguna columna con coeficiente negativo en esa fila: no hay variable que pueda entrar.`
+          : `Ya no hay b negativos: ${tDual.base.map((j, i) => `${tDual.cols[j].nombre} = ${t(tDual.b[i])}`).join(', ')}; Z = ${bmATexto(tDual.zval)}.`,
+      porQue:
+        d.estado === 'infactible'
+          ? 'Una fila con b negativo cuyos coeficientes no son negativos dice que una suma de términos ≥ 0 es igual a un número negativo, lo cual es imposible: el problema con el corte es infactible.'
+          : 'Con todos los b no negativos y los Cj−Zj de signo óptimo, el tablero es óptimo para el problema con el corte.',
       calculo: lineasTablero(tDual),
       tablero: tDual,
       grafica: g({ rectas: rec1 ? [rec1] : [], franjas: franja1 ? [franja1] : [], relajacion: undefined, optimo: puntoDe(solD, `(${solD.map((v) => dec(v, 2)).join('; ')})`, 'nodo') }),
@@ -408,13 +415,29 @@ export function pasosCortes(modelo, { conContinuacionPura = false } = {}) {
 
   // 13 Conclusión (óptimo mixto)
   const mixto = res; // tras cortar todo lo necesario
+  if (res.estado === 'infactible' || res.estado === 'limite_de_cortes') {
+    const inf = res.estado === 'infactible';
+    pasos.push({
+      titulo: 'Conclusión',
+      queHago: inf
+        ? `Tras ${nCortes} corte${nCortes > 1 ? 's' : ''} el simplex dual no encuentra columna para entrar: la fila con b negativo no tiene coeficientes negativos. El problema con los cortes es infactible, así que el problema entero no tiene solución.`
+        : `Se llegó al límite de ${nCortes} cortes sin que las variables enteras quedaran enteras; no se puede afirmar el óptimo.`,
+      porQue: inf
+        ? 'Cada corte conserva todos los puntos admisibles del problema mixto; si el problema con cortes queda sin solución, no había ningún punto admisible.'
+        : 'El método de Gomory no siempre termina rápido; en la práctica se limita el número de cortes.',
+      calculo: [`Estado: ${inf ? 'infactible' : 'límite de cortes'}`, `Cortes aplicados: ${nCortes}`],
+      vista: { tipo: 'texto' },
+      grafica: g({ rectas: rec1 ? [rec1] : [], franjas: franja1 ? [franja1] : [] }),
+    });
+    return pasos.map((p, i) => ({ id: i + 1, ...p, titulo: `${i + 1}. ${p.titulo}` }));
+  }
   const xFin = mixto.x;
   const intFracFin = xFin.map((v, j) => flags[j] && !v.isInteger());
   if (nCortes === 1 && !intFracFin.some(Boolean)) {
     pasos.push({
       titulo: 'Conclusión',
       queHago: `Las variables enteras ya son enteras: ${xFin.map((v, j) => `${nom[j]} = ${t(v)}${!flags[j] && !v.isInteger() ? ` ≈ ${dec(v)}` : ''}`).join(', ')}. El óptimo mixto es Z = ${t(mixto.z)}.`,
-      porQue: `Las variables continuas pueden quedar fraccionarias. Z bajó de ${t(lp.z)} a ${t(mixto.z)} por haber exigido la condición entera, que restringe la relajación.`,
+      porQue: `Las variables continuas pueden quedar fraccionarias. Z pasó de ${t(lp.z)} a ${t(mixto.z)} (${isMax ? 'no puede subir' : 'no puede bajar'}) por haber exigido la condición entera, que restringe la relajación.`,
       calculo: [`x = ${vec(xFin)}`, `Z = ${t(mixto.z)}`, ...xFin.map((v, j) => (!flags[j] && !v.isInteger() ? `${nom[j]} ≈ ${dec(v)}` : null)).filter(Boolean)],
       vista: { tipo: 'texto' },
       grafica: g({ rectas: rec1 ? [rec1] : [], franjas: franja1 ? [franja1] : [], optimo: puntoDe(xFin, `Óptimo mixto (${xFin.map((v) => dec(v, 2)).join('; ')})`, 'optimo') }),
@@ -458,7 +481,7 @@ export function pasosCortes(modelo, { conContinuacionPura = false } = {}) {
 
       pasos.push({
         ...base,
-        titulo: 'Si x1 también fuera entera',
+        titulo: `Si ${contNombres.join(', ') || 'la variable continua'} también fuera entera`,
         queHago: `${cands.map(({ j, i }) => `${tA.cols[j].nombre} = ${t(tA.b[i])}`).join(' y ')} ${cands.length > 1 ? 'son fraccionarios' : 'es fraccionario'} (parte ${cands.every(({ f }) => f.eq(cands[0].f)) && cands.length > 1 ? `${t(cands[0].f)} ${cands.length === 2 ? 'las dos' : 'todas'}` : cands.map(({ f }) => t(f)).join(', ')}). ${cands.length > 1 ? 'Hay empate: se corta la fila que aparece primero en el tablero, ' : 'Se corta por '}${fuente2}.`,
         porQue: 'Si todas las variables fueran enteras habría que seguir cortando mientras alguna quede fraccionaria. Esto solo ilustra la entera pura: en la mixta con la variable continua el proceso ya terminó.',
         calculo: [
@@ -523,7 +546,7 @@ export function pasosCortes(modelo, { conContinuacionPura = false } = {}) {
           ...base,
           titulo: 'Resultado de la entera pura',
           queHago: `Todas las variables quedan enteras: ${tF.base.map((j, i) => `${tF.cols[j].nombre} = ${t(tF.b[i])}`).join(', ')}; Z = ${t(pura.z)}.`,
-          porQue: 'Exigir que también x1 sea entera restringe más el problema, por eso Z baja respecto del óptimo mixto.',
+          porQue: `Exigir que también ${contNombres.join(', ') || 'la variable continua'} sea entera restringe más el problema, por eso Z ${isMax ? 'no sube' : 'no baja'} respecto del óptimo mixto.`,
           calculo: [
             ...lineasTablero(tF),
             ...extra,
@@ -554,6 +577,14 @@ function explicacionInfactible(m, node) {
   if (n !== 2 || node.branchVar == null) return null;
   const k = node.branchVar;
   const o = 1 - k;
+  // La rama pide x_k ≥ B (o ≤ B). Mirar solo x_k = B demuestra la infactibilidad únicamente si alejarse de B
+  // nunca ayuda a ninguna restricción; si no, se omite la explicación en vez de afirmar algo sin prueba.
+  const dir = node.branchOp === '>=' ? 1 : -1;
+  for (const ct of m.constraints) {
+    const efecto = frac(ct.a[k]).mul(dir);
+    const ayuda = ct.op === '=' ? !efecto.isZero() : ct.op === '<=' ? efecto.lt(ZERO) : efecto.gt(ZERO);
+    if (ayuda) return null;
+  }
   const nom = nombresOrig(n);
   let lo = null;
   let hi = null;
@@ -593,6 +624,7 @@ export function pasosRamificacion(modelo) {
   const contNombres = flags.map((f, j) => (!f ? nom[j] : null)).filter(Boolean);
   const r = solveIP({ ...m, integer: flags });
   const nodes = r.nodes || [];
+  const usaPiso = canUseFloorPruning(m.c, flags, !m.options || m.options.pruneWithFloor !== false);
   const g = (extra = {}) => (dosVars ? { integer: flags, ...extra } : undefined);
   const pasos = [];
 
@@ -605,10 +637,10 @@ export function pasosRamificacion(modelo) {
     grafica: g(),
   });
 
-  if (r.status === 'infeasible' || r.status === 'unbounded' || !r.relaxation) {
+  if (r.status === 'unbounded' || !r.relaxation) {
     pasos.push({
       titulo: 'Conclusión',
-      queHago: r.status === 'unbounded' ? 'La relajación no tiene máximo finito.' : 'La relajación es infactible.',
+      queHago: r.status === 'unbounded' ? `La relajación no tiene ${isMax ? 'máximo' : 'mínimo'} finito.` : 'La relajación es infactible.',
       porQue: 'Si la relajación no tiene solución, el problema entero tampoco.',
       calculo: [`Estado: ${r.status}`],
       vista: { tipo: 'texto' },
@@ -713,10 +745,15 @@ export function pasosRamificacion(modelo) {
       });
     } else if (nd.action === 'pruned-bound') {
       const inc = nd.incumbentAfter;
+      const yaNoMejora = inc && (isMax ? nd.z.lte(inc) : nd.z.gte(inc));
+      const zEnt = isMax ? nd.z.floor() : nd.z.ceil();
+      const conPiso = inc && usaPiso && !yaNoMejora;
       pasos.push({
         titulo: `Rama ${etq}, podada por cota`,
-        queHago: `La relajación da x = ${xTxt} con Z = ${t(nd.z)}${inc ? `, que no mejora el incumbente Z = ${t(inc)}` : ''}. Se poda.`,
-        porQue: `Como la relajación es una cota, ningún punto entero de esta rama puede superar Z = ${t(nd.z)}; si eso no mejora el incumbente, ramificar más es inútil.`,
+        queHago: conPiso
+          ? `La relajación da x = ${xTxt} con Z = ${t(nd.z)}. Como Z solo toma valores enteros en esta rama, su mejor valor posible es ${isMax ? '⌊Z⌋' : '⌈Z⌉'} = ${zEnt}, que no mejora el incumbente Z = ${t(inc)}. Se poda.`
+          : `La relajación da x = ${xTxt} con Z = ${t(nd.z)}${inc ? `, que no mejora el incumbente Z = ${t(inc)}` : ''}. Se poda.`,
+        porQue: `Como la relajación es una cota, ningún punto entero de esta rama puede ${isMax ? 'superar' : 'bajar de'} Z = ${t(nd.z)}; si eso no mejora el incumbente, ramificar más es inútil.`,
         calculo: [`x = ${xTxt}`, `Z = ${t(nd.z)}`, ...(inc ? [`Incumbente: Z = ${t(inc)}`] : [])],
         ...base,
         grafica: g({ rectas, puntos: [puntoDe(nd.x, `(${nd.x.map((v) => dec(v, 2)).join('; ')})`, 'nodo')] }),
@@ -754,8 +791,12 @@ export function pasosRamificacion(modelo) {
   if (best) {
     pasos.push({
       titulo: 'Conclusión',
-      queHago: `No quedan ramas abiertas. El óptimo del problema mixto es Z = ${t(best.z)} con x = ${vec(best.x)}.${obs ? ` ${obs}` : ''}`,
-      porQue: 'Todas las ramas terminaron podadas o con solución admisible; el mejor incumbente es el óptimo.',
+      queHago: r.status === 'nodeLimit'
+        ? `Se alcanzó el límite de nodos y quedaron ramas abiertas. La mejor solución hallada es Z = ${t(best.z)} con x = ${vec(best.x)}; no está probado que sea el óptimo.`
+        : `No quedan ramas abiertas. El óptimo del problema mixto es Z = ${t(best.z)} con x = ${vec(best.x)}.${obs ? ` ${obs}` : ''}`,
+      porQue: r.status === 'nodeLimit'
+        ? 'Con ramas sin explorar, el mejor incumbente es solo una cota del óptimo, no el óptimo.'
+        : 'Todas las ramas terminaron podadas o con solución admisible; el mejor incumbente es el óptimo.',
       calculo: [`x = ${vec(best.x)}`, `Z = ${t(best.z)}`, ...best.x.map((v, j) => (!flags[j] && !v.isInteger() ? `${nom[j]} ≈ ${dec(v)}` : null)).filter(Boolean), ...(obs ? [obs] : [])],
       vista: { tipo: 'arbol', hastaId: ultimoId, activoId: incumbente ? incumbente.id : root.id },
       grafica: g({ optimo: puntoDe(best.x, `Óptimo (${best.x.map((v) => dec(v, 2)).join('; ')})`, 'optimo') }),
@@ -763,8 +804,10 @@ export function pasosRamificacion(modelo) {
   } else {
     pasos.push({
       titulo: 'Conclusión',
-      queHago: 'No se encontró ninguna solución admisible para el problema mixto.',
-      porQue: 'Todas las ramas fueron infactibles o se alcanzó el límite de nodos.',
+        queHago: r.status === 'nodeLimit'
+          ? 'Se alcanzó el límite de nodos sin hallar ninguna solución admisible.'
+          : 'No existe ninguna solución admisible para el problema mixto: aunque la relajación tiene solución, todas las ramas terminaron infactibles.',
+      porQue: r.status === 'nodeLimit' ? 'Sin incumbente no se puede afirmar nada sobre el óptimo.' : 'Cada rama conserva todos los puntos admisibles; si todas quedan sin región factible, no había ninguno.',
       calculo: [`Estado: ${r.status}`],
       vista: { tipo: 'arbol', hastaId: ultimoId, activoId: root.id },
     });

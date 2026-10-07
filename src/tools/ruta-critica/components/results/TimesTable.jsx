@@ -41,7 +41,7 @@ export default function TimesTable({ analysis, hoveredAct, onHoverAct, title, no
       </div>
       {analysis.times && (
         <p className="table-note">
-          TIC y TFC: inicio y fin más cercanos. TIL y TFL: inicio y fin más lejanos. Holgura total = TIL − TIC; holgura libre = tiempo más temprano del evento j − TFC.
+          TIC y TFC: inicio y fin más cercanos. TIL y TFL: inicio y fin más lejanos. Holgura total = TIL − TIC; holgura libre = mínimo TIC de las actividades sucesoras − TFC.
         </p>
       )}
       <TableActions headers={headers} rows={rows} name={`${title}-tiempos`} notify={notify} />

@@ -1,12 +1,13 @@
+import { filtrar } from '@/shared/campos.js';
 import { NOTACION } from '../domain/notacion.js';
 
 const CAMPOS = [
-  { id: 'name', clase: 'pc-in--nombre', modo: 'text' },
-  { id: 'preds', clase: 'pc-in--preds', modo: 'text' },
-  { id: 'dn', clase: 'pc-in--num', modo: 'numeric' },
-  { id: 'cn', clase: 'pc-in--num', modo: 'decimal' },
-  { id: 'dl', clase: 'pc-in--num', modo: 'numeric' },
-  { id: 'cl', clase: 'pc-in--num', modo: 'decimal' },
+  { id: 'name', clase: 'pc-in--nombre', modo: 'text', filtro: (t) => filtrar.nombre(t) },
+  { id: 'preds', clase: 'pc-in--preds', modo: 'text', filtro: (t) => filtrar.listaNombres(t) },
+  { id: 'dn', clase: 'pc-in--num', modo: 'numeric', filtro: (t) => filtrar.entero(t) },
+  { id: 'cn', clase: 'pc-in--num', modo: 'decimal', filtro: (t) => filtrar.decimal(t) },
+  { id: 'dl', clase: 'pc-in--num', modo: 'numeric', filtro: (t) => filtrar.entero(t) },
+  { id: 'cl', clase: 'pc-in--num', modo: 'decimal', filtro: (t) => filtrar.decimal(t) },
 ];
 
 /** Tabla editable de actividades. `filasConError` = Set de índices de fila con error. */
@@ -35,7 +36,7 @@ export default function EditorTabla({ filas, acciones, filasConError }) {
                       aria-label={`${NOTACION.nombre[c.id]}, fila ${i + 1}`}
                       aria-invalid={filasConError.has(i) || undefined}
                       placeholder={c.id === 'preds' ? '-' : undefined}
-                      onChange={(e) => acciones.actualizar(f.id, c.id, e.target.value)}
+                      onChange={(e) => acciones.actualizar(f.id, c.id, c.filtro(e.target.value))}
                     />
                   </td>
                 ))}

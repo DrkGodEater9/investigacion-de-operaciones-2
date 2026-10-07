@@ -71,6 +71,13 @@ export function validarModelo(modelo) {
     vistos.add(a.name);
   });
   acts.forEach((a) => {
+    if (!Number.isInteger(a.d) || a.d < 1) errores.push(`La duración de "${a.name}" debe ser un entero de al menos 1 período.`);
+    if (a.r.length !== recursos.length || a.r.some((x) => !Number.isInteger(x) || x < 0)) errores.push(`Los requerimientos de "${a.name}" deben ser enteros no negativos, uno por recurso.`);
+  });
+  recursos.forEach((r) => {
+    if (r.limite != null && (!Number.isInteger(r.limite) || r.limite < 0)) errores.push(`El límite de "${r.name}" debe ser un entero no negativo.`);
+  });
+  acts.forEach((a) => {
     a.preds.forEach((p) => {
       if (p === a.name) errores.push(`"${a.name}" no puede depender de sí misma.`);
       else if (!vistos.has(p)) errores.push(`"${a.name}" depende de "${p}", que no existe en la tabla.`);
@@ -126,7 +133,8 @@ export function parseMarkdown(texto) {
   filas.slice(1).forEach((f, k) => {
     const fila = k + 1;
     const nombre = (f[cAct] ?? '').trim();
-    if (PALABRAS_LIMITE.has(quitarTildes(nombre))) {
+    const durVacia = ['', '-'].includes((f[cDur] ?? '').trim());
+    if (PALABRAS_LIMITE.has(quitarTildes(nombre)) && durVacia) { // con duración escrita sería una actividad que se llama «Max», etc.
       cols.forEach((c, j) => {
         const v = (f[c] ?? '').trim();
         if (v === '' || v === '-') return;

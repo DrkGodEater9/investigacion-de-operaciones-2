@@ -1,4 +1,5 @@
 import StatusMark from '@/ui/StatusMark.jsx';
+import { filtrar } from '@/shared/campos.js';
 import { hrefTopic } from '@/app/router.js';
 import { parseNumero, fmtNum } from '../domain/format.js';
 import ArbolSVG from './ArbolSVG.jsx';
@@ -25,11 +26,12 @@ function Control({ ej, resp, onChange, bloqueado }) {
           type="text"
           inputMode="decimal"
           autoComplete="off"
+          spellCheck={false}
           value={resp ?? ''}
           disabled={bloqueado}
           aria-invalid={invalido || undefined}
           aria-describedby={`${nombre}-ayuda`}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(filtrar.decimal(e.target.value, { negativo: true, fraccion: true }))}
         />
         <span id={`${nombre}-ayuda`} className={'ad-pr-ayuda' + (invalido ? ' is-mal' : '')}>
           {invalido ? 'Escribe un número, por ejemplo 12 o 12,5.' : (entrada.ayuda || 'Puedes escribir decimales con coma o punto.')}

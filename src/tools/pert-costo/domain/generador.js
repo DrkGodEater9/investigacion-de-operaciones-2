@@ -304,7 +304,7 @@ function conSolucion(ej) {
     }),
     costoDirecto: () => ({
       explicacion: 'Se parte del costo directo normal y se suma, en cada reducción, la pendiente del corte por las unidades acortadas.',
-      solucionDetallada: `Costo directo normal = ${num(res.normal.directo)}.\n${textoReducciones(m, res)}\nPara terminar en ${ej.objetivo} el costo directo es ${num(res.estadoEn(ej.objetivo).directo)}.`,
+      solucionDetallada: `Costo directo normal = ${num(res.normal.directo)}.\n${textoReduccionesHasta(m, res, ej.objetivo)}\nPara terminar en ${ej.objetivo} el costo directo es ${num(res.estadoEn(ej.objetivo).directo)}.`,
     }),
     duracionOptima: () => ({
       explicacion: `Se acorta mientras la pendiente del corte sea menor que el costo indirecto por unidad (${num(ej.ci)}). Cuando la pendiente supera ese ahorro, el costo total vuelve a subir.`,

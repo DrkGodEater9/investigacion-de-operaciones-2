@@ -50,7 +50,7 @@ export function pasosNivelar(red) {
   pasos[1].texto += ' La nivelación no mira el límite: busca que las barras queden lo más parejas posible moviendo actividades no críticas dentro de su holgura.';
   pasos.push({
     titulo: 'Cómo se nivela',
-    texto: 'Se recorren las actividades de atrás hacia adelante. Cada una tiene una ventana de comienzos posibles: desde que terminan sus predecesoras hasta que sus sucesoras deben empezar (o hasta el final del proyecto). Se mide la carga que ya hay en los períodos que ocuparía y se coloca donde esa carga es menor. Solo se mueve si mejora; si empata, se queda (o se toma el comienzo más temprano).',
+    texto: 'Se recorren las actividades de atrás hacia adelante. Cada una tiene una ventana de comienzos posibles: desde que terminan sus predecesoras hasta que sus sucesoras deben empezar (o hasta el final del proyecto). Se mide la carga que ya hay en los períodos que ocuparía y se coloca donde esa carga es menor. Solo se mueve si mejora; si empata con el comienzo actual, se queda (y entre dos comienzos nuevos igual de buenos se toma el más temprano). Un comienzo que haría subir el pico del consumo no se permite.',
     calculo: [`Medida de lo parejo: Σ (consumo por período)² = ${r.objetivoAntes} al empezar. Mientras más baja, más parejo.`],
     starts: c.ES.slice(),
     resalta: {},
@@ -58,15 +58,15 @@ export function pasosNivelar(red) {
   });
   r.log.forEach((e, n) => {
     const nom = red.nombres[e.act];
-    const mejorCosto = Math.min(...e.costos.map((x) => x.costo));
+    const mejorCosto = Math.min(...e.costos.filter((x) => !x.sube).map((x) => x.costo));
     pasos.push({
       titulo: `Pasada ${e.pasada}: actividad ${nom}`,
       texto: e.movio
         ? `${nom} puede empezar entre ${e.ventana[0]} y ${e.ventana[1]}. La carga más baja está en el comienzo ${e.elegido} (carga ${mejorCosto}), menor que la de su comienzo actual ${e.antes} (carga ${e.costos.find((x) => x.s === e.antes).costo}). Se mueve: pasa de ${rangoPeriodos(e.antes, red.d[e.act])} a ${rangoPeriodos(e.elegido, red.d[e.act])}.`
-        : `${nom} puede empezar entre ${e.ventana[0]} y ${e.ventana[1]}, pero ningún comienzo tiene menos carga que el actual (${e.antes}). Se queda en ${rangoPeriodos(e.antes, red.d[e.act])}.`,
+        : `${nom} puede empezar entre ${e.ventana[0]} y ${e.ventana[1]}, pero ningún comienzo permitido tiene menos carga que el actual (${e.antes}). Se queda en ${rangoPeriodos(e.antes, red.d[e.act])}.`,
       calculo: [
         `Requiere ${textoReq(red, e.act)} durante ${periodos(red.d[e.act])}.`,
-        ...e.costos.map((x) => `Comienzo ${x.s}: carga existente ${x.costo}${x.s === e.elegido ? '  ← elegido' : ''}${x.s === e.antes && x.s !== e.elegido ? '  (actual)' : ''}`),
+        ...e.costos.map((x) => `Comienzo ${x.s}: carga existente ${x.costo}${x.s === e.elegido ? '  ← elegido' : ''}${x.s === e.antes && x.s !== e.elegido ? '  (actual)' : ''}${x.sube ? '  (no se permite: subiría el pico)' : ''}`),
       ],
       starts: e.starts,
       resalta: { [e.act]: e.movio ? 'mueve' : 'foco' },

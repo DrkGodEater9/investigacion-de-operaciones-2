@@ -1,3 +1,4 @@
+import { filtrar, propsNumero } from '@/shared/campos.js';
 import { MAX_VARS } from '../domain/modelo.js';
 import { sub } from '../domain/format.js';
 
@@ -18,7 +19,9 @@ export default function EditorModelo({ draft, acciones: a }) {
                     value={nm}
                     aria-label={`Nombre de la variable ${j + 1}`}
                     spellCheck={false}
-                    onChange={(e) => a.setNombre(j, e.target.value)}
+                    autoComplete="off"
+
+                    onChange={(e) => a.setNombre(j, filtrar.nombre(e.target.value))}
                   />
                 </th>
               ))}
@@ -44,11 +47,12 @@ export default function EditorModelo({ draft, acciones: a }) {
                 <td key={j}>
                   <input
                     className="eb-in eb-in--num"
-                    inputMode="decimal"
+                    {...propsNumero}
+
                     value={v}
                     placeholder="0"
                     aria-label={`Costo de ${sub(draft.names[j])} en el objetivo`}
-                    onChange={(e) => a.setC(j, e.target.value)}
+                    onChange={(e) => a.setC(j, filtrar.decimal(e.target.value, { negativo: true }))}
                   />
                 </td>
               ))}
@@ -61,18 +65,21 @@ export default function EditorModelo({ draft, acciones: a }) {
                     className="eb-in eb-in--restr"
                     value={r.name}
                     aria-label={`Nombre de la restricción ${i + 1}`}
-                    onChange={(e) => a.setNombreRestr(i, e.target.value)}
+                    autoComplete="off"
+
+                    onChange={(e) => a.setNombreRestr(i, filtrar.texto1(e.target.value))}
                   />
                 </td>
                 {r.a.map((v, j) => (
                   <td key={j}>
                     <input
                       className="eb-in eb-in--num"
-                      inputMode="decimal"
+                      {...propsNumero}
+
                       value={v}
                       placeholder="0"
                       aria-label={`Restricción ${i + 1}, coeficiente de ${sub(draft.names[j])}`}
-                      onChange={(e) => a.setA(i, j, e.target.value)}
+                      onChange={(e) => a.setA(i, j, filtrar.decimal(e.target.value, { negativo: true }))}
                     />
                   </td>
                 ))}
@@ -91,11 +98,12 @@ export default function EditorModelo({ draft, acciones: a }) {
                 <td>
                   <input
                     className="eb-in eb-in--num"
-                    inputMode="decimal"
+                    {...propsNumero}
+
                     value={r.b}
                     placeholder="0"
                     aria-label={`Restricción ${i + 1}, valor de b`}
-                    onChange={(e) => a.setB(i, e.target.value)}
+                    onChange={(e) => a.setB(i, filtrar.decimal(e.target.value, { negativo: true }))}
                   />
                 </td>
                 <td>

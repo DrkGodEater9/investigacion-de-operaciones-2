@@ -1,8 +1,7 @@
-import { describirIntegralidad } from './exportData.js';
+import { describirIntegralidad, formatoLineal, simboloOperador, resumenResultado } from './exportTexto.js';
 import { saveFile } from '@/shared/files.js';
 
 export async function exportPdf({ model, result, title = 'Programación entera pura' }) {
-  const mixtoPdf = Array.isArray(model.integer) && model.integer.some((v) => v === false);
   const [{ jsPDF }, autoTableMod, fonts] = await Promise.all([
     import('jspdf'),
     import('jspdf-autotable'),
@@ -50,7 +49,7 @@ export async function exportPdf({ model, result, title = 'Programación entera p
 
   doc.setFont(FONT, 'normal');
   doc.setFontSize(10);
-  const objText = `${model.sense === 'max' ? 'Maximizar' : 'Minimizar'} Z = ${model.c.map((coef, i) => `${coef}x${i + 1}`).join(' + ')}`;
+  const objText = `${model.sense === 'max' ? 'Maximizar' : 'Minimizar'} Z = ${formatoLineal(model.c, { ascii: true })}`;
   doc.text(objText, MARGIN + 12, y);
   y += 14;
 
@@ -58,9 +57,7 @@ export async function exportPdf({ model, result, title = 'Programación entera p
   y += 14;
 
   model.constraints.forEach((ct) => {
-    const op = ct.op === '<=' ? '<=' : ct.op === '>=' ? '>=' : '=';
-    const lhs = ct.a.map((ai, j) => `${ai}x${j + 1}`).join(' + ');
-    doc.text(`${lhs} ${op} ${ct.b}`, MARGIN + 24, y);
+    doc.text(`${formatoLineal(ct.a, { ascii: true })} ${simboloOperador(ct.op, { ascii: true })} ${ct.b}`, MARGIN + 24, y);
     y += 13;
   });
   doc.text(describirIntegralidad(model, 'pdf'), MARGIN + 24, y);
@@ -75,30 +72,12 @@ export async function exportPdf({ model, result, title = 'Programación entera p
   doc.setFont(FONT, 'normal');
   doc.setFontSize(10);
 
-  let statusText = 'Solución óptima encontrada';
-  if (result.status === 'infeasible') statusText = 'Infactible (sin solución entera)';
-  else if (result.status === 'unbounded') statusText = 'No acotado';
-  else if (result.status === 'nodeLimit') statusText = 'Límite de nodos alcanzado';
-
-  doc.text(`Estado: ${statusText}`, MARGIN + 12, y);
-  y += 14;
-
-  if (result.relaxation?.z) {
-    doc.text(`Relajación continua Z(P0): ${result.relaxation.z.toDual()}`, MARGIN + 12, y);
+  // Mismo resumen que el Markdown (incluye «mejor solución hallada» si se agotó el límite de nodos)
+  for (const { k, v } of resumenResultado(model, result, { ascii: true })) {
+    doc.text(`${k}: ${v}`, MARGIN + 12, y);
     y += 14;
   }
-
-  if (result.best) {
-    doc.text(`Valor óptimo ${mixtoPdf ? 'mixto' : 'entero'} Z*: ${result.best.z.toDual()}`, MARGIN + 12, y);
-    y += 14;
-    doc.text(`Punto óptimo X*: (${result.best.x.map((v) => v.toDual()).join('; ')})`, MARGIN + 12, y);
-    y += 14;
-  }
-
-  const cNodes = result.counts?.nodes || 0;
-  const cPruned = result.counts?.pruned || 0;
-  doc.text(`Nodos explorados: ${cNodes}       Nodos podados: ${cPruned}`, MARGIN + 12, y);
-  y += 24;
+  y += 10;
 
   // Tabla de nodos
   doc.setFont(FONT, 'bold');

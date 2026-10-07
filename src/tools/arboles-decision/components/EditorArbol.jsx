@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { filtrar, propsNumero } from '@/shared/campos.js';
 import Segmented from '@/ui/Segmented.jsx';
 import { parseProb, fmtNum } from '../domain/format.js';
 import { NOTACION } from '../domain/notacion.js';
@@ -30,20 +31,22 @@ function Rama({ nodo, rama, i, acc, marca, puedeQuitar, nivel }) {
           className="ad-in ad-in--etiqueta"
           value={rama.etiqueta}
           placeholder="Nombre de la rama"
+          autoComplete="off"
+          spellCheck={false}
           aria-label={`Nombre de la rama ${i + 1} de «${nodo.nombre || nodo.id}»`}
-          onChange={(e) => acc.setRama(nodo.id, i, { etiqueta: e.target.value })}
+          onChange={(e) => acc.setRama(nodo.id, i, { etiqueta: filtrar.texto1(e.target.value, { max: 40 }) })}
         />
         {nodo.tipo === 'azar' && (
           <label className="ad-campo">
             <span>p</span>
             <input
               className="ad-in ad-in--num"
-              inputMode="decimal"
+              {...propsNumero}
               value={rama.p ?? ''}
               placeholder="0,5"
               aria-label={`Probabilidad de la rama «${rama.etiqueta || i + 1}»`}
               aria-invalid={clave('p') || undefined}
-              onChange={(e) => acc.setRama(nodo.id, i, { p: e.target.value })}
+              onChange={(e) => acc.setRama(nodo.id, i, { p: filtrar.porcentaje(e.target.value, { fraccion: true }) })}
             />
           </label>
         )}
@@ -51,12 +54,12 @@ function Rama({ nodo, rama, i, acc, marca, puedeQuitar, nivel }) {
           <span>{NOTACION.pago}</span>
           <input
             className="ad-in ad-in--num"
-            inputMode="decimal"
+            {...propsNumero}
             value={rama.pago ?? ''}
             placeholder="0"
             aria-label={`Pago de la rama «${rama.etiqueta || i + 1}»`}
             aria-invalid={clave('pago') || undefined}
-            onChange={(e) => acc.setRama(nodo.id, i, { pago: e.target.value })}
+            onChange={(e) => acc.setRama(nodo.id, i, { pago: filtrar.decimal(e.target.value, { negativo: true, fraccion: true }) })}
           />
         </label>
         <button type="button" className="btn btn--sm ad-quitar" disabled={!puedeQuitar} onClick={() => acc.quitarRama(nodo.id, i)} aria-label={`Quitar la rama «${rama.etiqueta || i + 1}»`} title="Quitar la rama">
@@ -81,12 +84,12 @@ function Nodo({ nodo, acc, marca, nivel, raiz = false }) {
           <span>Resultado final</span>
           <input
             className="ad-in ad-in--num"
-            inputMode="decimal"
+            {...propsNumero}
             value={nodo.valor ?? ''}
             placeholder="valor"
             aria-label="Valor del resultado final"
             aria-invalid={marca.has(`${nodo.id}:valor`) || undefined}
-            onChange={(e) => acc.setNodo(nodo.id, { valor: e.target.value })}
+            onChange={(e) => acc.setNodo(nodo.id, { valor: filtrar.decimal(e.target.value, { negativo: true, fraccion: true }) })}
           />
         </label>
       </div>
@@ -102,7 +105,9 @@ function Nodo({ nodo, acc, marca, nivel, raiz = false }) {
           value={nodo.nombre ?? ''}
           placeholder={nodo.tipo === 'decision' ? 'Nombre de la decisión' : 'Nombre del evento'}
           aria-label="Nombre del nodo"
-          onChange={(e) => acc.setNodo(nodo.id, { nombre: e.target.value })}
+          autoComplete="off"
+          spellCheck={false}
+          onChange={(e) => acc.setNodo(nodo.id, { nombre: filtrar.texto1(e.target.value, { max: 40 }) })}
         />
       </div>
       <ul className="ad-ramas">

@@ -41,14 +41,16 @@ export function resumen(a) {
     `Duración límite: ${res.Tmin} (costo total ${num(res.limite.total)}).`,
     `Duración de costo mínimo: ${o.T}, con costo directo ${num(e.directo)}, indirecto ${num(e.indirecto)} y total ${num(o.total)}.`,
     ...(o.empates.length > 1 ? [`Empate de costo total en las duraciones ${o.empates.join(', ')}.`] : []),
-    `Rutas críticas con duraciones normales: ${res.normal.rutas.rutas.map((r) => textoRuta(r, m.names)).join('; ')}.`,
+    res.normal.rutas.truncado || res.normal.rutas.rutas.length > 12
+      ? `Rutas críticas con duraciones normales: ${res.normal.rutas.truncado ? 'más de ' : ''}${res.normal.rutas.rutas.length} (por ejemplo ${res.normal.rutas.rutas.slice(0, 2).map((r) => textoRuta(r, m.names)).join('; ')}).`
+      : `Rutas críticas con duraciones normales: ${res.normal.rutas.rutas.map((r) => textoRuta(r, m.names)).join('; ')}.`,
   ];
 }
 
 /** Tabla de actividades con pendiente. */
 export function tablaActividades(a) {
   const { m, res } = a;
-  const crit = new Set(res.normal.rutas.rutas.flat());
+  const crit = new Set(m.names.filter((_, j) => res.normal.tiempos.critica[j]));
   const headers = [...NOTACION.columnas.map((c) => NOTACION.nombre[c]), NOTACION.pendiente, 'Crítica (normal)'];
   const rows = m.names.map((nom, j) => [
     nom,

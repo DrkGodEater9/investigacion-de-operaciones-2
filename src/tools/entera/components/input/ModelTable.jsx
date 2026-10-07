@@ -1,4 +1,8 @@
 import Segmented from '@/ui/Segmented.jsx';
+import { filtrar, propsNumero } from '@/shared/campos.js';
+
+const OPC_MODELO = { negativo: true, fraccion: true };
+const num = (v) => filtrar.decimal(v, OPC_MODELO);
 
 export function ModelTable({
   model,
@@ -64,10 +68,12 @@ export function ModelTable({
               <input
                 id={`input-c-${j}`}
                 type="text"
+                {...propsNumero}
                 className="input-num"
                 value={model.c[j] || ''}
                 placeholder="0"
-                onChange={(e) => onSetC(j, e.target.value)}
+                aria-label={`Coeficiente c${j + 1} de la función objetivo`}
+                onChange={(e) => onSetC(j, num(e.target.value))}
               />
             </div>
           ))}
@@ -125,11 +131,12 @@ export function ModelTable({
                     <td key={`ct-${i}-${j}`}>
                       <input
                         type="text"
+                        {...propsNumero}
                         className="input-num"
                         value={ct.a[j] || ''}
                         placeholder="0"
                         aria-label={`R${i + 1} coeficiente x${j + 1}`}
-                        onChange={(e) => onSetConstraintA(i, j, e.target.value)}
+                        onChange={(e) => onSetConstraintA(i, j, num(e.target.value))}
                       />
                     </td>
                   ))}
@@ -148,11 +155,12 @@ export function ModelTable({
                   <td className="td-b">
                     <input
                       type="text"
+                      {...propsNumero}
                       className="input-num"
                       value={ct.b || ''}
                       placeholder="0"
                       aria-label={`R${i + 1} término independiente b`}
-                      onChange={(e) => onSetConstraintB(i, e.target.value)}
+                      onChange={(e) => onSetConstraintB(i, num(e.target.value))}
                     />
                   </td>
                   <td className="td-del">

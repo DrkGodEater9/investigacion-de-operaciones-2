@@ -85,6 +85,7 @@ export default function Solver() {
                     className="bz-textarea"
                     value={s.md}
                     rows={14}
+                    maxLength={20000}
                     spellCheck={false}
                     aria-label="Tablas Markdown del problema"
                     onChange={(e) => s.setMd(e.target.value)}

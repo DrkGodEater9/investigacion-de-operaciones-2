@@ -132,7 +132,6 @@ test('tiempos: coinciden con la enumeración de rutas en miles de redes aleatori
 
 test('tiempos: coinciden con la red de flechas de analyze() (TIC, TFC, TIL, TFL, holguras, rutas críticas)', () => {
   let conFicticias = 0;
-  let difHL = 0;
   for (let seed = 1; seed <= 1500; seed++) {
     const rng = mulberry32(seed + 77000);
     const acts = redAzar(rng, { maxN: 10, durMax: 5 });
@@ -145,18 +144,14 @@ test('tiempos: coinciden con la red de flechas de analyze() (TIC, TFC, TIL, TFL,
       const i = an.times.edgeInfo[e.id];
       const x = r.fila[e.act];
       for (const k of ['tic', 'tfc', 'til', 'tfl', 'ht']) assert.ok(cerca(i[k], x[k]), `seed ${seed} ${e.act}.${k}: red ${i[k]} tabla ${x[k]}`);
-      // Holgura libre: la de la red (tiempo del evento j − TFC) nunca supera a la definición por sucesoras;
-      // son iguales si la red no tiene ficticias. Con ficticias la red puede dar menos (hallazgo avisado).
-      assert.ok(i.hl <= x.hl + 1e-9, `seed ${seed} ${e.act}: HL de la red mayor que la de la tabla`);
-      if (!an.dummies) assert.ok(cerca(i.hl, x.hl), `seed ${seed} ${e.act}.hl sin ficticias`);
-      else if (!cerca(i.hl, x.hl)) difHL++;
+      // Holgura libre: la de la red (mín TIC de las sucesoras vía ficticias − TFC) coincide con la de la tabla.
+      assert.ok(cerca(i.hl, x.hl), `seed ${seed} ${e.act}.hl: red ${i.hl} tabla ${x.hl}`);
     }
     const clave = (rs) => rs.map((q) => q.join('>')).sort().join('|');
     assert.equal(clave(an.critical.routes.map((q) => q.acts)), clave(r.rutasCriticas), `seed ${seed}: rutas críticas`);
   }
   assert.ok(conFicticias > 200, `pocas redes con ficticias (${conFicticias})`);
-  assert.ok(difHL >= 0);
-});
+  });
 
 test('PERT: te, varianza, ruta de mayor varianza y sumas coinciden con un cálculo en sextos (enteros)', () => {
   for (let seed = 1; seed <= 1500; seed++) {

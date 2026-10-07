@@ -2,7 +2,7 @@
 import { buildNetwork } from './network.js';
 import { computeLayout } from './layout.js';
 import {
-  cierrePredecesoras, verificarRed, contarFicticias, extremosTabla, nombresOrdenados,
+  cierrePredecesoras, verificarRed, contarFicticias, extremosTabla, nombresOrdenados, minimoFicticiasExacto,
 } from './dependenciasRed.js';
 import { explicarFicticias } from './pasosEstructura.js';
 
@@ -144,7 +144,9 @@ function genFicticias(seed, rng) {
   for (let i = 0; i < 80; i++) {
     acts = tablaAleatoria(rng, rng.int(5, 6));
     net = buildNetwork(acts);
-    if (contarFicticias(net) === objetivo) break;
+    // Solo tablas donde el constructor alcanza el mínimo absoluto (verificado por búsqueda exhaustiva): así la respuesta es única.
+    const d = contarFicticias(net);
+    if (d === objetivo && (d === 0 || minimoFicticiasExacto(acts, d - 1) === Infinity)) break;
   }
   const n = contarFicticias(net);
   const razones = explicarFicticias(net);

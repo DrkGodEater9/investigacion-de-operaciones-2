@@ -20,6 +20,14 @@ export function textoRuta(ruta, nombres) {
 
 const textoRutas = (rutas, nombres) => rutas.map((r) => textoRuta(r, nombres)).join(' y ');
 
+const MAX_LISTADAS = 12;
+
+/** «Hay 2 rutas críticas simultáneas (A–B y A–C)»; con muchas rutas (o truncadas) solo se cuenta y se ejemplifica. */
+export function hayRutas(rutas, truncado, nombres) {
+  if (!truncado && rutas.length <= MAX_LISTADAS) return `Hay ${rutas.length} rutas críticas simultáneas (${textoRutas(rutas, nombres)})`;
+  return `Hay ${truncado ? 'más de ' : ''}${rutas.length} rutas críticas simultáneas (por ejemplo ${textoRutas(rutas.slice(0, 2), nombres)})`;
+}
+
 /** Pasos del ejemplo resuelto. m = modelo, res = resolver(m). */
 export function explicarPasos(m, res) {
   const nombres = m.names;
@@ -54,7 +62,7 @@ export function explicarPasos(m, res) {
     id: 'normal',
     fase: 'datos',
     titulo: 'Proyecto con duraciones normales',
-    texto: `Con todas las actividades en su duración normal el proyecto dura ${res.T0}. ${rn.length === 1 ? 'La ruta crítica es' : `Hay ${rn.length} rutas críticas simultáneas:`} ${textoRutas(rn, nombres)}. El costo directo es la suma de los costos normales; el costo indirecto es ${n.ci} por la duración.`,
+    texto: `Con todas las actividades en su duración normal el proyecto dura ${res.T0}. ${rn.length === 1 ? `La ruta crítica es ${textoRutas(rn, nombres)}` : `${hayRutas(rn, res.normal.rutas.truncado, nombres)}`}. El costo directo es la suma de los costos normales; el costo indirecto es ${n.ci} por la duración.`,
     calculo: [
       `Duración normal = ${res.T0}`,
       `Costo directo = Σ ${n.cn} = ${num(res.normal.directo)}`,
@@ -68,7 +76,7 @@ export function explicarPasos(m, res) {
     total: res.normal.total,
     acortadas: [],
     alargadas: [],
-    criticas: res.normal.rutas.rutas.flat().filter((x, i, a) => a.indexOf(x) === i),
+    criticas: nombres.filter((_, j) => res.normal.tiempos.critica[j]),
     rutas: rn,
     hasta: res.T0,
   });
@@ -85,20 +93,27 @@ export function explicarPasos(m, res) {
     let que;
     if (p.tipo === 'una') {
       if (rutasA.length > 1) {
-        que = `Hay ${rutasA.length} rutas críticas simultáneas (${textoRutas(rutasA, nombres)}), así que hay que acortar al menos una actividad en cada ruta. ${acort[0]} está en todas: acortarla baja la duración de todas a la vez y es la opción más barata (pendiente ${num(p.pendiente)}).`;
+        que = `${hayRutas(rutasA, p.rutasAntesTruncado, nombres)}, así que hay que acortar al menos una actividad en cada ruta. ${acort[0]} está en todas: acortarla baja la duración de todas a la vez y es la opción más barata (pendiente ${num(p.pendiente)}).`;
       } else if (cand.length === 1) {
         que = `La ruta crítica es ${textoRutas(rutasA, nombres)}. Se acorta ${acort[0]}, la única actividad crítica que todavía se puede acortar.`;
       } else {
         que = `La ruta crítica es ${textoRutas(rutasA, nombres)}. Se acorta ${acort[0]}, la actividad crítica con menor pendiente (${candTxt}).`;
       }
     } else if (p.tipo === 'conjunto') {
-      que = `Hay ${rutasA.length} rutas críticas simultáneas (${textoRutas(rutasA, nombres)}). Acortar una sola actividad no basta: hay que acortar al menos una en cada ruta crítica, y el conjunto de menor costo por unidad es ${lista(acort)} (${p.acortan.map((a) => num(a.pend)).join(' + ')} = ${num(p.pendiente)}).`;
+      que = `${hayRutas(rutasA, p.rutasAntesTruncado, nombres)}. Acortar una sola actividad no basta: hay que acortar al menos una en cada ruta crítica, y el conjunto de menor costo por unidad es ${lista(acort)} (${p.acortan.map((a) => num(a.pend)).join(' + ')} = ${num(p.pendiente)}).`;
     } else {
-      que = `Hay ${rutasA.length} rutas críticas simultáneas (${textoRutas(rutasA, nombres)}). El corte más barato acorta ${lista(acort)} y alarga ${lista(alar)}: ${alar.length === 1 ? 'esa actividad ya se había acortado antes' : 'esas actividades ya se habían acortado antes'}, y devolverle${alar.length === 1 ? '' : 's'} una unidad recupera su costo (${p.alargan.map((a) => num(a.pend)).join(' + ')}). Costo neto por unidad: ${p.acortan.map((a) => num(a.pend)).join(' + ')} − ${p.alargan.map((a) => num(a.pend)).join(' − ')} = ${num(p.pendiente)}.`;
+      que = `${hayRutas(rutasA, p.rutasAntesTruncado, nombres)}. El corte más barato acorta ${lista(acort)} y alarga ${lista(alar)}: ${alar.length === 1 ? 'esa actividad ya se había acortado antes' : 'esas actividades ya se habían acortado antes'}, y devolverle${alar.length === 1 ? '' : 's'} una unidad recupera su costo (${p.alargan.map((a) => num(a.pend)).join(' + ')}). Costo neto por unidad: ${p.acortan.map((a) => num(a.pend)).join(' + ')} − ${p.alargan.map((a) => num(a.pend)).join(' − ')} = ${num(p.pendiente)}.`;
     }
     if (irreducibles.length) que += ` ${lista(irreducibles)} ${irreducibles.length === 1 ? 'ya está' : 'ya están'} en ${irreducibles.length === 1 ? 'su límite y no se puede' : 'su límite y no se pueden'} acortar más.`;
 
     const corte = p.tipo === 'con-alargue' ? null : cortesPosibles(m, antes.d, 4);
+    if (p.tipo === 'con-alargue') {
+      const sin = cortesPosibles(m, antes.d, 1);
+      const mejor = sin && sin.cortes[0];
+      if (!sin) que += ' Solo acortar actividades (sin devolver tiempo) no alcanzaría para bajar la duración.';
+      else if (!mejor) que += ' Sin devolver tiempo a ninguna actividad no hay forma de bajar la duración.';
+      else if (mejor.costo > p.pendiente + 1e-9) que += ` Si solo se acortara (sin devolver tiempo), lo más barato desde aquí sería ${lista(mejor.actividades)} (${num(mejor.costo)} por unidad), que cuesta más: por eso aquí el procedimiento de solo acortar no da el costo mínimo.`;
+    }
     if (corte && p.tipo === 'conjunto') {
       const otras = corte.cortes.filter((c) => c.actividades.join() !== acort.join()).slice(0, 3);
       if (otras.length) que += ` Otras opciones que cortan todas las rutas: ${otras.map((c) => `${lista(c.actividades)} (${num(c.costo)})`).join('; ')}.`;
@@ -108,7 +123,9 @@ export function explicarPasos(m, res) {
       ? `${seAcorta(p.unidades)}, hasta llegar a la duración mínima posible (${res.Tmin}).`
       : p.termina === 'limite'
         ? `${seAcorta(p.unidades)} porque ${lista(p.llegaLimite)} ${p.llegaLimite.length === 1 ? 'llega' : 'llegan'} a su duración límite.`
-        : `${seAcorta(p.unidades)}; con una más se vuelve crítica otra ruta y cambia el corte.`;
+        : p.criticasAntes.join() === p.criticasDespues.join()
+          ? `${seAcorta(p.unidades)}; con una más el corte más barato cambia (las actividades críticas son las mismas, pero lo que ya se acortó modifica las opciones).`
+          : `${seAcorta(p.unidades)}; con una más cambian las actividades críticas (otra ruta se vuelve crítica) y cambia el corte.`;
 
     const cmp = p.empata ? '=' : p.conviene ? '<' : '>';
     const veredicto = p.empata

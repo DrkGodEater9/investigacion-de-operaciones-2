@@ -39,6 +39,8 @@ const CONTEXTOS = [
 ];
 
 const num = fmtNum;
+/** «de» + artículo: «de el» → «del» (el producto → del producto). */
+const de = (s) => (/^el /.test(s) ? `del ${s.slice(3)}` : `de ${s}`);
 
 /* ---------- constructores de árbol (forma normalizada) ---------- */
 const F = (valor) => ({ id: '', tipo: 'final', nombre: '', valor, ramas: [] });
@@ -80,13 +82,13 @@ const mejor = (sense, xs) => {
 function valorEsperado(rng, ctx) {
   const p = probs(rng, 3);
   const valores = rng.shuffle([-40, -20, 0, 20, 40, 60, 80, 100, 120, 160, 200]).slice(0, 3).sort((a, b) => b - a);
-  const arbol = arbolDe('max', ctx.unidad, A(`Resultado de ${ctx.producto}`, ctx.e3.map((e, i) => R(e, valores[i], { p: p[i] }))));
+  const arbol = arbolDe('max', ctx.unidad, A(`Resultado ${de(ctx.producto)}`, ctx.e3.map((e, i) => R(e, valores[i], { p: p[i] }))));
   const ve = p.reduce((s, x, i) => s + x * valores[i], 0);
   const terminos = p.map((x, i) => `${num(x)} × ${fmtPar(valores[i])}`).join(' + ');
   return {
     titulo: 'Valor esperado de un nodo de azar',
-    enunciado: `${ctx.sujeto} evalúa ${ctx.producto}. Su resultado, en ${ctx.unidad}, depende de ${ctx.asunto}, como muestra el árbol.`,
-    pregunta: `¿Cuál es el valor esperado de ${ctx.producto}?`,
+    enunciado: `${ctx.sujeto} evalúa ${ctx.producto}. Su resultado, en ${ctx.unidad}, depende ${de(ctx.asunto)}, como muestra el árbol.`,
+    pregunta: `¿Cuál es el valor esperado ${de(ctx.producto)}?`,
     arbol,
     datos: { p, valores },
     entrada: { tipo: 'numero', tolerancia: 0.01, ayuda: 'Puedes usar decimales con coma o punto.' },
@@ -100,13 +102,13 @@ function completar(rng, ctx) {
   const p = probs(rng, 3);
   const valores = rng.shuffle([-40, -20, 0, 20, 40, 60, 80, 100, 120, 160, 200]).slice(0, 3).sort((a, b) => b - a);
   const falta = rng.int(0, 2);
-  const arbol = arbolDe('max', ctx.unidad, A(`Resultado de ${ctx.producto}`, ctx.e3.map((e, i) => R(e, valores[i], { p: i === falta ? null : p[i] }))));
+  const arbol = arbolDe('max', ctx.unidad, A(`Resultado ${de(ctx.producto)}`, ctx.e3.map((e, i) => R(e, valores[i], { p: i === falta ? null : p[i] }))));
   const conocidas = p.filter((_, i) => i !== falta);
   const suma = conocidas.reduce((s, x) => s + x, 0);
   const ve = p.reduce((s, x, i) => s + x * valores[i], 0);
   return {
     titulo: 'Árbol con una probabilidad por deducir',
-    enunciado: `${ctx.sujeto} evalúa ${ctx.producto}, cuyo resultado (en ${ctx.unidad}) depende de ${ctx.asunto}. En el árbol falta la probabilidad de «${ctx.e3[falta]}».`,
+    enunciado: `${ctx.sujeto} evalúa ${ctx.producto}, cuyo resultado (en ${ctx.unidad}) depende ${de(ctx.asunto)}. En el árbol falta la probabilidad de «${ctx.e3[falta]}».`,
     pregunta: 'Deduce la probabilidad que falta y calcula el valor esperado.',
     arbol,
     datos: { p: p.map((x, i) => (i === falta ? null : x)), valores, falta },
@@ -292,7 +294,7 @@ function riesgo(rng, ctx) {
     const pNeg = p.reduce((s, x, i) => s + (valores[i] < 0 ? x : 0), 0);
     if (pNeg < 0.1 || pNeg > 0.9) continue;
     const etiquetas = ['Escenario 1', 'Escenario 2', 'Escenario 3', 'Escenario 4'];
-    const arbol = arbolDe('max', ctx.unidad, A(`Resultado de ${ctx.producto}`, etiquetas.map((e, i) => R(e, valores[i], { p: p[i] }))));
+    const arbol = arbolDe('max', ctx.unidad, A(`Resultado ${de(ctx.producto)}`, etiquetas.map((e, i) => R(e, valores[i], { p: p[i] }))));
     const ve = p.reduce((s, x, i) => s + x * valores[i], 0);
     return {
       titulo: 'Probabilidad de perder (perfil de riesgo)',
@@ -383,7 +385,8 @@ function errorProbable(ej, resp) {
     const reg = res.ramas[1];
     const sinElegir = ej.arbol.raiz.ramas[0].pago + buena.p * (buena.pago + alto) + reg.p * reg.hijo.valor;
     candidatos.push([sinElegir, 'Parece que en «Expandir» no comparaste con «No expandir» (en una decisión se elige la mejor rama, no siempre la misma).']);
-    candidatos.push([ev.valor - ej.arbol.raiz.ramas[0].pago, 'Parece que no restaste el costo inicial de invertir.']);
+    // solo tiene sentido si la mejor estrategia es invertir (si no, el costo inicial no entra en el valor)
+    if (ev.porNodo[ej.arbol.raiz.id].elegida === 0) candidatos.push([ev.valor - ej.arbol.raiz.ramas[0].pago, 'Parece que no restaste el costo inicial de invertir.']);
   } else if (ej.tipo === 'indiferencia') {
     const p = (ej.datos.K - ej.datos.b) / (ej.datos.a - ej.datos.b);
     candidatos.push([1 - p, 'Parece que diste 1 − p: revisa cuál probabilidad se pide (la de éxito).']);

@@ -19,7 +19,7 @@ export function pasosInduccion(arbol, evPrevia) {
 
   pasos.push({
     titulo: 'El árbol planteado',
-    texto: `El árbol tiene ${nDec} nodo${nDec === 1 ? '' : 's'} de decisión (cuadrados), ${nAzar} de azar (círculos) y ${nHojas} resultado${nHojas === 1 ? '' : 's'} final${nHojas === 1 ? '' : 'es'}. `
+    texto: `El árbol tiene ${nDec} nodo${nDec === 1 ? '' : 's'} de decisión (${nDec === 1 ? 'cuadrado' : 'cuadrados'}), ${nAzar} de azar (${nAzar === 1 ? 'círculo' : 'círculos'}) y ${nHojas} resultado${nHojas === 1 ? '' : 's'} final${nHojas === 1 ? '' : 'es'}. `
       + `Se lee de izquierda a derecha para entender la situación y se resuelve de derecha a izquierda: primero los nodos que están justo antes de los resultados.`
       + ` Objetivo: ${maximiza ? NOTACION.max : NOTACION.min}.`,
     calculo: [

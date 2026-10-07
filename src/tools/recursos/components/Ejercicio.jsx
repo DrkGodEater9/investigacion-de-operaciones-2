@@ -1,3 +1,4 @@
+import { filtrar } from '@/shared/campos.js';
 import StatusMark from '@/ui/StatusMark.jsx';
 import { hrefTopic } from '@/app/router.js';
 
@@ -56,11 +57,12 @@ function Control({ ej, resp, onChange, bloqueado }) {
           type="text"
           inputMode="decimal"
           autoComplete="off"
+          spellCheck={false}
           value={resp ?? ''}
           disabled={bloqueado}
           aria-invalid={invalido || undefined}
           aria-describedby={invalido ? `${nombre}-ayuda` : undefined}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(filtrar.decimal(e.target.value, { negativo: true }))}
         />
         {invalido && <span id={`${nombre}-ayuda`} className="rc-ayuda">Escribe un número, por ejemplo 12.</span>}
       </div>

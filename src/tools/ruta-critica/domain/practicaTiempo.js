@@ -136,8 +136,8 @@ const nombrePide = (p) => `${NOT[p]} (${NOMBRE[p]})`;
 /** Elige una actividad con cierto interés (con predecesoras o sucesoras según lo que se pregunta). */
 /**
  * Actividades cuya holgura libre es la misma por la definición (mín TIC de las sucesoras − TFC) y en la
- * red de flechas de «Resuelve el tuyo» (tiempo del evento j − TFC). Con ficticias pueden diferir; esos
- * casos no se preguntan para que la respuesta no dependa del método.
+ * red de flechas de «Resuelve el tuyo». Desde que la red usa la misma definición (cpm.js) coinciden siempre;
+ * se conserva como red de seguridad: si alguna vez diferieran, esa actividad no se pregunta.
  */
 export function holguraLibreSinAmbiguedad(acts, r) {
   const rows = acts.map((a) => ({ name: a.name, preds: a.preds.join(',') || '-', d: String(a.d), a: '', m: '', b: '' }));

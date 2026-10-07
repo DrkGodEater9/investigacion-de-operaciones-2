@@ -1,3 +1,4 @@
+import { filtrar } from '@/shared/campos.js';
 import { useState } from 'react';
 import { restriccionLogica, TIPOS_LOGICA } from '../domain/logica.js';
 import { sub } from '../domain/format.js';
@@ -45,7 +46,7 @@ export default function PanelLogica({ names, onAgregar }) {
           {def.usaK && (
             <label className="inline-field">
               k
-              <input className="eb-in eb-in--k" inputMode="numeric" value={k} onChange={(e) => { setK(e.target.value); setError(''); }} aria-label="Valor de k" />
+              <input className="eb-in eb-in--k" inputMode="numeric" autoComplete="off" spellCheck={false} value={k} onChange={(e) => { setK(filtrar.entero(e.target.value, { max: 3 })); setError(''); }} aria-label="Valor de k" />
             </label>
           )}
         </div>

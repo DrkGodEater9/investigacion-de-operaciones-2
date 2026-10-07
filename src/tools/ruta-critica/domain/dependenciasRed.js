@@ -104,3 +104,77 @@ export function sinFicticiasNecesarias(acts) {
   }
   return ![...grupos.values()].some((c) => c > 1);
 }
+
+/**
+ * Mínimo de ficticias entre TODAS las redes posibles (búsqueda exhaustiva sobre grafos, para tablas pequeñas).
+ * Se construyen los eventos en orden: cada actividad sale de un evento donde ya terminaron exactamente sus
+ * predecesoras totales. Un evento distinto del inicial siempre tiene algo terminado. Devuelve el menor número
+ * de ficticias que no supere `tope`, o Infinity si con `tope` no alcanza.
+ */
+export function minimoFicticiasExacto(acts, tope) {
+  const n = acts.length;
+  const idx = new Map(acts.map((a, i) => [a.name, i]));
+  const cierre = cierrePredecesoras(acts);
+  const F = acts.map((a) => [...cierre.get(a.name)].reduce((m, x) => m | (1 << idx.get(x)), 0));
+  const full = (1 << n) - 1;
+  for (let d = 0; d <= tope; d++) {
+    const m = n + d + 1;
+    const reach = [0];
+    const outdeg = [0];
+    const dfs = (v, usadas, dRest) => {
+      if (usadas === full) {
+        const k = reach.length;
+        let sin = 0;
+        let ultimo = -1;
+        for (let u = 0; u < k; u++) if (!outdeg[u]) { sin++; ultimo = u; }
+        if (sin === 1 && ultimo === k - 1 && reach[k - 1] === full) return true;
+      }
+      if (v >= m) return false;
+      const cand = [];
+      for (let a = 0; a < n; a++) {
+        if (usadas & (1 << a)) continue;
+        for (let u = 0; u < v; u++) if (reach[u] === F[a]) cand.push([a, u]);
+      }
+      const sel = [];
+      let dummyIn = 0;
+      const fict = (u, usadasLoc, origenes, dr) => {
+        if (u === v) {
+          let r = 0;
+          const entradas = [];
+          for (const [a, uu] of sel) { r |= reach[uu] | (1 << a); entradas.push(uu); }
+          for (let w = 0; w < v; w++) if (dummyIn & (1 << w)) { r |= reach[w]; entradas.push(w); }
+          if (!entradas.length || r === 0) return false;
+          const previos = entradas.map((w) => [w, outdeg[w]]);
+          entradas.forEach((w) => { outdeg[w]++; });
+          reach.push(r);
+          outdeg.push(0);
+          const ok = dfs(v + 1, usadasLoc, dr);
+          reach.pop();
+          outdeg.pop();
+          previos.forEach(([w, x]) => { outdeg[w] = x; });
+          return ok;
+        }
+        if (dr > 0 && !(origenes & (1 << u))) {
+          dummyIn |= 1 << u;
+          const ok = fict(u + 1, usadasLoc, origenes, dr - 1);
+          dummyIn &= ~(1 << u);
+          if (ok) return true;
+        }
+        return fict(u + 1, usadasLoc, origenes, dr);
+      };
+      const eleg = (i, usadasLoc, origenes) => {
+        if (i === cand.length) return fict(0, usadasLoc, origenes, dRest);
+        const [a, u] = cand[i];
+        if (!(usadasLoc & (1 << a)) && !(origenes & (1 << u))) {
+          sel.push([a, u]);
+          if (eleg(i + 1, usadasLoc | (1 << a), origenes | (1 << u))) return true;
+          sel.pop();
+        }
+        return eleg(i + 1, usadasLoc, origenes);
+      };
+      return eleg(0, usadas, 0);
+    };
+    if (dfs(1, 0, d)) return d;
+  }
+  return Infinity;
+}

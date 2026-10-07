@@ -50,11 +50,11 @@ function redAleatoria(rng) {
 
 const conLimite = (modelo, limite) => ({ recursos: [{ ...modelo.recursos[0], limite }], acts: modelo.acts });
 
-const ORDEN_TEXTO = 'Si hay empate se desempata por menor LS, luego menor holgura y luego por orden alfabético.';
+const ORDEN_TEXTO = 'Los tiempos ES, LS, LF y la holgura son los de la ruta crítica sin límite de recursos. Una actividad que empieza no se interrumpe. Si hay empate se desempata por menor LS, luego menor holgura y luego por orden alfabético.';
 
 function enunciadoBase(modelo, extra) {
   const rec = modelo.recursos[0].name;
-  return `Cada actividad de la tabla consume la cantidad indicada de ${rec} en cada período que dura. ${extra}`;
+  return `Cada actividad de la tabla consume la cantidad indicada de ${rec} en cada período que dura. Una actividad que empieza en el tiempo s ocupa los períodos s + 1 a s + d (el período t es el intervalo (t − 1, t]). ${extra}`;
 }
 
 /** Perfil temprano y datos comunes. */
@@ -80,7 +80,7 @@ const CONSTRUCTORES = {
     const idx = enCurso.map((x) => red.nombres.indexOf(x));
     return {
       modelo,
-      enunciado: enunciadoBase(modelo, 'Cada actividad empieza en su comienzo temprano (ES). El período t es el intervalo de tiempo (t − 1, t].'),
+      enunciado: enunciadoBase(modelo, 'Cada actividad empieza en su comienzo temprano (ES).'),
       pregunta: `¿Cuántas unidades de ${nom} se necesitan en el período ${t}?`,
       entrada: { tipo: 'numero' },
       respuesta: uso[t - 1],

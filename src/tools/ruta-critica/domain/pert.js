@@ -1,13 +1,9 @@
+import { phi } from './normal.js';
 export const expectedTime = (a, m, b) => (a + 4 * m + b) / 6;
 export const variance = (a, b) => ((b - a) / 6) ** 2;
 
-// Función de distribución normal estándar (aproximación de Abramowitz-Stegun, error < 1e-7).
-export function normalCdf(z) {
-  const t = 1 / (1 + 0.2316419 * Math.abs(z));
-  const poly = t * (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
-  const p = 1 - (Math.exp(-(z * z) / 2) / Math.sqrt(2 * Math.PI)) * poly;
-  return z >= 0 ? p : 1 - p;
-}
+// Función de distribución normal estándar: la misma (precisión de doble) que usan Teoría, Paso a paso y Práctica.
+export const normalCdf = (z) => phi(z);
 
 export const normalPdf = (z) => Math.exp(-(z * z) / 2) / Math.sqrt(2 * Math.PI);
 

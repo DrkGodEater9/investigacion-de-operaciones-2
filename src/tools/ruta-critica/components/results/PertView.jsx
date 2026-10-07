@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { filtrar, propsNumero } from '@/shared/campos.js';
 import { fmt } from '../../domain/format.js';
 import { normalCdf, normalInv } from '../../domain/pert.js';
 import NormalCurve from './NormalCurve.jsx';
@@ -12,7 +13,11 @@ export default function PertView({ analysis, pertInfo, routeIdx, setRouteIdx, ti
   const sd = pertInfo.sd;
   const [deadline, setDeadline] = useState(Math.round(Te));
   const [prob, setProb] = useState(95);
+  const [deadlineTxt, setDeadlineTxt] = useState(String(Math.round(Te)));
+  const [probTxt, setProbTxt] = useState('95');
   useEffect(() => { setDeadline(Math.round(Te)); }, [Te]);
+  useEffect(() => { setDeadlineTxt((t) => (aNum(t) === deadline ? t : String(deadline))); }, [deadline]);
+  const aNum = (t) => { const n = Number(t.replace(',', '.')); return Number.isFinite(n) ? n : 0; };
 
   const z = sd > 0 ? (deadline - Te) / sd : deadline >= Te ? Infinity : -Infinity;
   const p = sd > 0 ? normalCdf(z) : deadline >= Te ? 1 : 0;
@@ -73,7 +78,13 @@ export default function PertView({ analysis, pertInfo, routeIdx, setRouteIdx, ti
           <div className="calc-row">
             <label className="inline-field">
               T
-              <input type="number" value={deadline} step="any" onChange={(e) => setDeadline(Number(e.target.value))} />
+              <input
+                type="text"
+                {...propsNumero}
+                value={deadlineTxt}
+                aria-label="Tiempo objetivo T"
+                onChange={(e) => { const t = filtrar.decimal(e.target.value, { negativo: true, max: 12 }); setDeadlineTxt(t); setDeadline(aNum(t)); }}
+              />
             </label>
             <input
               type="range"
@@ -98,7 +109,13 @@ export default function PertView({ analysis, pertInfo, routeIdx, setRouteIdx, ti
           <h3>¿Qué plazo da cierta probabilidad?</h3>
           <label className="inline-field">
             Probabilidad deseada (%)
-            <input type="number" min="0.01" max="99.99" step="any" value={prob} onChange={(e) => setProb(Number(e.target.value))} />
+            <input
+              type="text"
+              {...propsNumero}
+              value={probTxt}
+              aria-label="Probabilidad deseada en porcentaje"
+              onChange={(e) => { const t = filtrar.decimal(e.target.value, { max: 6 }); setProbTxt(t); setProb(aNum(t)); }}
+            />
           </label>
           <p className="formula">
             Z = {fmt(zInv, 4)} → T = T<sub>e</sub> + Z·σ = {f(Te)} + {fmt(zInv, 4)} × {fmt(sd, 4)}

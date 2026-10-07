@@ -6,6 +6,7 @@ import Segmented from '@/ui/Segmented.jsx';
 import Toast from '@/ui/Toast.jsx';
 import { useProgress } from '@/app/ProgressContext.jsx';
 import { hrefTopic } from '@/app/router.js';
+import { filtrar, propsEntero } from '@/shared/campos.js';
 import '@/tools/bayes/bayes.css';
 
 const TEMA = 'decision-bayes';
@@ -67,7 +68,7 @@ export default function Practica() {
       <div className="bz-pr-barra">
         <form className="inline-field" onSubmit={usarSemilla}>
           <label htmlFor="bz-semilla">Repetir semilla</label>
-          <input id="bz-semilla" inputMode="numeric" value={entradaSemilla} onChange={(e) => setEntradaSemilla(e.target.value)} placeholder="4821" />
+          <input id="bz-semilla" {...propsEntero} aria-label="Semilla del ejercicio" value={entradaSemilla} onChange={(e) => setEntradaSemilla(filtrar.semilla(e.target.value))} placeholder="4821" />
           <button type="submit" className="btn btn--sm">Ir</button>
         </form>
         <span className="bz-pr-sesion" aria-live="polite">Correctas: {sesion.a} de {sesion.b}</span>

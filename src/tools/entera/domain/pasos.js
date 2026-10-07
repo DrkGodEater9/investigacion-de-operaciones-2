@@ -1,4 +1,5 @@
 import { frac } from './fraction.js';
+import { canUseFloorPruning } from './branchAndBound.js';
 
 /**
  * Formatea un vector de variables para presentación en texto.
@@ -29,6 +30,42 @@ function formatZ(z) {
   return `${f.toDecimal()} (${f.toString()})`;
 }
 
+/** Misma regla de poda por cota que solveIP. */
+function podaPorCota(z, inc, isMax, usaPiso) {
+  if (isMax) return usaPiso ? z.floor() <= inc.floor() : z.lte(inc);
+  return usaPiso ? z.ceil() >= inc.ceil() : z.gte(inc);
+}
+
+/**
+ * Comparación de poda por cota entre la relajación de un nodo (z) y el incumbente (inc).
+ * Con piso (coeficientes enteros sobre variables enteras): en máx. ⌊Z⌋ ≤ ⌊Z*⌋ y en mín. ⌈Z⌉ ≥ ⌈Z*⌉.
+ * Sin piso: Z ≤ Z* (máx.) o Z ≥ Z* (mín.).
+ */
+function comparacionCota(z, inc, isMax, usaPiso) {
+  const zd = z.toDecimal();
+  const cmp = isMax ? '≤' : '≥';
+  if (usaPiso) {
+    const zi = isMax ? z.floor() : z.ceil();
+    const ii = isMax ? inc.floor() : inc.ceil();
+    const a = isMax ? '⌊' : '⌈';
+    const c = isMax ? '⌋' : '⌉';
+    return {
+      titulo: `${a}${zd}${c} = ${zi} ${cmp} ${ii}`,
+      calculo: `Cota entera: ${a}Z${c} = ${a}${zd}${c} = ${zi}\nComparación: ${a}Z${c} = ${zi} ${cmp} Z* = ${ii}\nResultado: se poda por cota.`,
+      parcial: `${a}Z${c} = ${zi}`,
+      limite: `${ii}`,
+      zi: `${zi}`,
+    };
+  }
+  return {
+    titulo: `${zd} ${cmp} ${inc.toDecimal()}`,
+    calculo: `Comparación: Z = ${zd} ${cmp} Z* = ${inc.toDecimal()}\nResultado: se poda por cota.`,
+    parcial: `Z = ${zd}`,
+    limite: inc.toDecimal(),
+    zi: zd,
+  };
+}
+
 /**
  * Genera la lista ordenada de pasos didácticos para la pestaña «Paso a paso».
  * Función 100% pura y reproducible, basada en el resultado de solveIP.
@@ -52,6 +89,10 @@ export function buildSteps(arg1, arg2) {
   const steps = [];
   const nodes = result?.nodes || [];
   const isMax = (model.sense || 'max') === 'max';
+  const cModelo = model.c || ['5', '4'];
+  const flagsInt = cModelo.map((_, j) => (model.integer && model.integer[j] !== undefined ? !!model.integer[j] : true));
+  // Misma decisión que toma solveIP: con piso/techo solo si c es entera sobre variables enteras.
+  const usaPiso = canUseFloorPruning(cModelo, flagsInt, model.options?.pruneWithFloor !== false);
 
   // --------------------------------------------------------------------------
   // Paso 1: Planteamiento y región factible
@@ -96,12 +137,26 @@ export function buildSteps(arg1, arg2) {
     },
   });
 
-  if (!nodes || nodes.length === 0 || result.status === 'infeasible') {
+  const sinFinal = { visibleNodeIds: [], activeNodeId: null, incumbent: null, strip: null, highlightPoint: null };
+  if (result.status === 'unbounded') {
+    steps.push({
+      id: 2,
+      phase: 'conclusion',
+      title: '2. Problema no acotado',
+      explanation:
+        'La relajación lineal no tiene óptimo finito: la función objetivo puede mejorar sin límite dentro de la región factible. Por eso no hay un óptimo entero que buscar.',
+      calculation: 'Relajación lineal no acotada.',
+      state: sinFinal,
+    });
+    return steps;
+  }
+
+  if (!nodes || nodes.length === 0 || (result.status === 'infeasible' && !result.relaxation)) {
     steps.push({
       id: 2,
       phase: 'conclusion',
       title: '2. Problema infactible',
-      explanation: 'El sistema de restricciones no admite ninguna solución factible.',
+      explanation: 'El sistema de restricciones no admite ninguna solución factible: ni siquiera la relajación lineal tiene región factible.',
       calculation: 'Región factible vacía (infactible).',
       state: {
         visibleNodeIds: [],
@@ -176,7 +231,8 @@ export function buildSteps(arg1, arg2) {
       val: xj.toDecimal(),
       fracDec: f.toDecimal(),
       fracStr: f.toString(),
-      isFrac: !xj.isInteger(),
+      f,
+      isFrac: flagsInt[idx] && !xj.isInteger(),
     };
   });
 
@@ -186,17 +242,31 @@ export function buildSteps(arg1, arg2) {
     .join('\n');
 
   const chosenVarName = `x${branchVarIndex + 1}`;
-  const otherVarPart = fracParts.find((p) => p.idx !== branchVarIndex && p.isFrac);
-  const comparisonText = otherVarPart
-    ? `Como {${chosenVarName}} (${fracParts[branchVarIndex].fracDec}) > {${otherVarPart.name}} (${otherVarPart.fracDec}), se selecciona ${chosenVarName}.`
-    : `Se selecciona ${chosenVarName} por ser fraccionaria.`;
+  const regla = model.options?.branchRule || 'mostFractional';
+  const elegida = fracParts[branchVarIndex];
+  const otras = fracParts.filter((p) => p.idx !== branchVarIndex && p.isFrac);
+  let comparisonText;
+  if (otras.length === 0) {
+    comparisonText = `Se selecciona ${chosenVarName} por ser la única variable fraccionaria.`;
+  } else if (regla === 'lowestIndex') {
+    comparisonText = `Con la regla de menor índice se selecciona ${chosenVarName}, la primera variable fraccionaria.`;
+  } else {
+    const empatadas = otras.filter((p) => p.f.eq(elegida.f));
+    if (empatadas.length > 0) {
+      comparisonText = `{${chosenVarName}} (${elegida.fracDec}) = ${empatadas.map((p) => `{${p.name}} (${p.fracDec})`).join(' = ')}: hay empate y se selecciona la de menor subíndice, ${chosenVarName}.`;
+    } else {
+      comparisonText = `Como {${chosenVarName}} (${elegida.fracDec}) > ${otras.map((p) => `{${p.name}} (${p.fracDec})`).join(' y ')}, se selecciona ${chosenVarName}.`;
+    }
+  }
 
   steps.push({
     id: 3,
     phase: 'select_branch',
     title: '3. ¿Es entera? Verificación y selección de variable',
     explanation:
-      `La solución relajada contiene variables con valores fraccionarios. Se calculan las partes fraccionarias de cada variable ({v} = v − ⌊v⌋) y se elige la de mayor valor fraccionario para ramificar. En caso de empate se selecciona la de menor subíndice.`,
+      regla === 'lowestIndex'
+        ? `La solución relajada contiene variables con valores fraccionarios. Se calculan las partes fraccionarias de cada variable ({v} = v − ⌊v⌋) y, con la regla de menor índice, se ramifica en la primera variable fraccionaria.`
+        : `La solución relajada contiene variables con valores fraccionarios. Se calculan las partes fraccionarias de cada variable ({v} = v − ⌊v⌋) y se elige la de mayor valor fraccionario para ramificar. En caso de empate se selecciona la de menor subíndice.`,
     calculation: `${fracCalcs}\n${comparisonText}`,
     state: {
       visibleNodeIds: [root.id],
@@ -278,7 +348,28 @@ export function buildSteps(arg1, arg2) {
       continue;
     }
 
-    if (node.status === 'integer' || node.action === 'incumbent') {
+    if (node.status === 'integer' && node.action !== 'incumbent') {
+      // Entera, pero no mejora el incumbente: la rama se cierra sin cambiar Z*.
+      const zInc = currentIncumbent ? formatZ(currentIncumbent.z) : '—';
+      steps.push({
+        id: steps.length + 1,
+        phase: 'node_pruned',
+        title: `Resolver ${node.label}: ${formatVec(node.x, false)}, Z = ${formatZ(node.z)} (entera, no mejora Z* = ${zInc})`,
+        explanation:
+          `Se resuelve la relajación de ${node.label} con la restricción ${branchLabel}. La solución es totalmente entera: x = ${formatVec(node.x, false)} con Z = ${formatZ(node.z)}. Como ${isMax ? 'no es mayor' : 'no es menor'} que el incumbente Z* = ${zInc}, no lo reemplaza y la rama queda cerrada.`,
+        calculation: `Restricción: ${branchLabel}\nSolución: x = ${formatVec(node.x, false)}\nZ = ${formatZ(node.z)}\nResultado: entera factible, pero Z ${isMax ? '≤' : '≥'} Z* = ${zInc} → el incumbente se conserva.`,
+        state: {
+          visibleNodeIds: [...currentVisible],
+          activeNodeId: node.id,
+          incumbent: currentIncumbent,
+          strip: stripInfo,
+          highlightPoint: nodeX,
+        },
+      });
+      continue;
+    }
+
+    if (node.action === 'incumbent') {
       currentIncumbent = { x: node.x, z: node.z };
       steps.push({
         id: steps.length + 1,
@@ -299,21 +390,18 @@ export function buildSteps(arg1, arg2) {
       // Si había nodos pendientes de poda que ahora pueden ser podados por este nuevo incumbente
       for (let pIdx = pendingPrunes.length - 1; pIdx >= 0; pIdx--) {
         const pNode = pendingPrunes[pIdx];
-        const canPrune = isMax
-          ? pNode.z.floor() <= currentIncumbent.z.floor()
-          : pNode.z.ceil() >= currentIncumbent.z.ceil();
+        const canPrune = podaPorCota(pNode.z, currentIncumbent.z, isMax, usaPiso);
 
         if (canPrune) {
           pendingPrunes.splice(pIdx, 1);
-          const zFloor = pNode.z.floor();
-          const incFloor = currentIncumbent.z.floor();
+          const cmpCota = comparacionCota(pNode.z, currentIncumbent.z, isMax, usaPiso);
           steps.push({
             id: steps.length + 1,
             phase: 'node_pruned',
-            title: `Podar ${pNode.label}: ⌊${pNode.z.toDecimal()}⌋ = ${zFloor} ≤ ${incFloor}`,
+            title: `Podar ${pNode.label}: ${cmpCota.titulo}`,
             explanation:
-              `Con el nuevo incumbente Z* = ${currentIncumbent.z.toDual()} hallado en ${node.label}, se comprueba la cota del subproblema pendiente ${pNode.label}. Como ⌊Z⌋ = ${zFloor} no puede superar a Z* = ${incFloor}, ${pNode.label} se poda por cota.`,
-            calculation: `Cota entera: ⌊Z⌋ = ⌊${pNode.z.toDecimal()}⌋ = ${zFloor}\nComparación: ⌊Z⌋ = ${zFloor} ≤ Z* = ${incFloor}\nResultado: se poda por cota.`,
+              `Con el nuevo incumbente Z* = ${currentIncumbent.z.toDual()} hallado en ${node.label}, se comprueba la cota del subproblema pendiente ${pNode.label}. Como ${cmpCota.parcial} no ${isMax ? 'puede superar' : 'puede mejorar por debajo de'} Z* = ${cmpCota.limite}, ${pNode.label} se poda por cota.`,
+            calculation: cmpCota.calculo,
             state: {
               visibleNodeIds: [...currentVisible],
               activeNodeId: pNode.id,
@@ -329,9 +417,7 @@ export function buildSteps(arg1, arg2) {
 
     if (node.action === 'pruned-bound') {
       // ¿Existe ya un incumbente que lo pode en este instante?
-      const canPruneNow = currentIncumbent !== null && (
-        isMax ? node.z.floor() <= currentIncumbent.z.floor() : node.z.ceil() >= currentIncumbent.z.ceil()
-      );
+      const canPruneNow = currentIncumbent !== null && podaPorCota(node.z, currentIncumbent.z, isMax, usaPiso);
 
       // Paso 1: Resolver la relajación del nodo
       steps.push({
@@ -352,16 +438,16 @@ export function buildSteps(arg1, arg2) {
 
       if (canPruneNow) {
         // Paso 2: Podar inmediatamente por cota contra el incumbente activo
-        const zFloor = node.z.floor();
-        const incFloor = currentIncumbent.z.floor();
+        const cmpCota = comparacionCota(node.z, currentIncumbent.z, isMax, usaPiso);
 
         steps.push({
           id: steps.length + 1,
           phase: 'node_pruned',
-          title: `Podar ${node.label}: ⌊${node.z.toDecimal()}⌋ = ${zFloor} ≤ ${incFloor}`,
-          explanation:
-            `Dado que los coeficientes de la función objetivo son enteros, cualquier solución entera que pudiera existir en las ramas descendientes de ${node.label} tendría un valor Z entero a lo sumo igual a ⌊${node.z.toDecimal()}⌋ = ${zFloor}. Como ya se dispone de un incumbente con Z* = ${currentIncumbent.z.toDual()}, este subproblema no puede mejorarlo y se poda por cota.`,
-          calculation: `Cota entera: ⌊Z⌋ = ⌊${node.z.toDecimal()}⌋ = ${zFloor}\nComparación: ⌊Z⌋ = ${zFloor} ≤ Z* = ${incFloor}\nResultado: se poda por cota.`,
+          title: `Podar ${node.label}: ${cmpCota.titulo}`,
+          explanation: usaPiso
+            ? `Dado que los coeficientes de la función objetivo son enteros, cualquier solución entera que pudiera existir en las ramas descendientes de ${node.label} tendría un valor Z entero ${isMax ? 'a lo sumo igual a' : 'al menos igual a'} ${cmpCota.zi}. Como ya se dispone de un incumbente con Z* = ${currentIncumbent.z.toDual()}, este subproblema no puede mejorarlo y se poda por cota.`
+            : `La relajación de ${node.label} da Z = ${node.z.toDual()}, que ${isMax ? 'no supera' : 'no es menor que'} el incumbente Z* = ${currentIncumbent.z.toDual()}. Como agregar restricciones nunca mejora Z, ningún descendiente de ${node.label} puede mejorarlo y se poda por cota.`,
+          calculation: cmpCota.calculo,
           state: {
             visibleNodeIds: [...currentVisible],
             activeNodeId: node.id,
@@ -383,8 +469,12 @@ export function buildSteps(arg1, arg2) {
       phase: 'node_branch',
       title: `Resolver ${node.label} (${branchLabel}): x = ${formatVec(node.x, false)}, Z = ${formatZ(node.z)}`,
       explanation:
-        `Se resuelve la relajación de ${node.label} con ${branchLabel}. La solución es fraccionaria con Z = ${formatZ(node.z)}. Al superar al incumbente actual, el subproblema queda abierto para seguir ramificando.`,
-      calculation: `Restricción: ${branchLabel}\nSolución: x = ${formatVec(node.x, false)}\nZ = ${formatZ(node.z)}\nEstado: fraccionario prometedor → subproblema abierto.`,
+        `Se resuelve la relajación de ${node.label} con ${branchLabel}. La solución es fraccionaria con Z = ${formatZ(node.z)}. ${
+          currentIncumbent
+            ? 'Su cota todavía puede mejorar al incumbente, así que el subproblema queda abierto para seguir ramificando.'
+            : 'Todavía no hay incumbente con el cual compararlo, así que no se puede podar por cota: el subproblema queda abierto para seguir ramificando.'
+        }`,
+      calculation: `Restricción: ${branchLabel}\nSolución: x = ${formatVec(node.x, false)}\nZ = ${formatZ(node.z)}\nEstado: fraccionario → subproblema abierto.`,
       state: {
         visibleNodeIds: [...currentVisible],
         activeNodeId: node.id,
@@ -397,15 +487,15 @@ export function buildSteps(arg1, arg2) {
 
   // Si queda algún pendiente de podar antes de concluir
   for (const pNode of pendingPrunes) {
-    const zFloor = pNode.z.floor();
-    const incFloor = currentIncumbent ? currentIncumbent.z.floor() : '—';
+    if (!currentIncumbent) continue;
+    const cmpCota = comparacionCota(pNode.z, currentIncumbent.z, isMax, usaPiso);
     steps.push({
       id: steps.length + 1,
       phase: 'node_pruned',
-      title: `Podar ${pNode.label}: ⌊${pNode.z.toDecimal()}⌋ = ${zFloor} ≤ ${incFloor}`,
+      title: `Podar ${pNode.label}: ${cmpCota.titulo}`,
       explanation:
-        `Con el incumbente Z* = ${currentIncumbent ? currentIncumbent.z.toDual() : '—'}, la cota entera de ${pNode.label} (⌊Z⌋ = ${zFloor}) no puede superarlo. Se poda por cota.`,
-      calculation: `Cota entera: ⌊Z⌋ = ⌊${pNode.z.toDecimal()}⌋ = ${zFloor}\nComparación: ⌊Z⌋ = ${zFloor} ≤ Z* = ${incFloor}\nResultado: se poda por cota.`,
+        `Con el incumbente Z* = ${currentIncumbent.z.toDual()}, la cota de ${pNode.label} (${cmpCota.parcial}) no puede mejorarlo. Se poda por cota.`,
+      calculation: cmpCota.calculo,
       state: {
         visibleNodeIds: [...currentVisible],
         activeNodeId: pNode.id,
@@ -423,14 +513,40 @@ export function buildSteps(arg1, arg2) {
   const bestXStr = best ? formatVec(best.x, false) : 'Ninguno';
   const bestZStr = best ? formatZ(best.z) : '—';
   const bestNode = nodes.find((n) => n.action === 'incumbent' && best && n.z && n.z.eq(best.z));
+  const limite = result.status === 'nodeLimit';
+
+  let titulo;
+  let explicacion;
+  let calculo;
+  if (!best) {
+    titulo = limite ? 'Conclusión: límite de nodos alcanzado sin solución entera' : 'Conclusión: problema infactible (no hay solución entera)';
+    explicacion = limite
+      ? 'Se alcanzó el límite de nodos del árbol sin hallar ninguna solución entera factible. No se puede afirmar nada sobre el óptimo.'
+      : 'Todos los subproblemas del árbol terminaron podados por infactibilidad: la relajación lineal tiene solución, pero ningún punto con coordenadas enteras cumple las restricciones. El problema entero es infactible.';
+    calculo = `Sin solución entera factible
+Nodos explorados: ${nodes.length}`;
+  } else if (limite) {
+    titulo = `Conclusión: límite de nodos, mejor solución ${bestXStr}, Z = ${bestZStr}`;
+    explicacion = `Se alcanzó el límite de nodos y quedaron subproblemas sin explorar. La mejor solución entera hallada es x = ${bestXStr} con Z = ${bestZStr}, pero no está probado que sea la óptima.`;
+    calculo = `Mejor solución hallada:
+x = ${bestXStr}
+Z = ${bestZStr}
+Nodos explorados: ${nodes.length}`;
+  } else {
+    titulo = `Conclusión: óptimo entero ${bestXStr}, Z = ${bestZStr}`;
+    explicacion = `Todos los subproblemas del árbol han sido explorados o podados. La búsqueda finaliza con éxito. La solución óptima entera del problema es x = ${bestXStr} con un valor de función objetivo Z = ${bestZStr}.`;
+    calculo = `Solución óptima entera:
+x* = ${bestXStr}
+Z* = ${bestZStr}
+Nodos explorados: ${nodes.length}`;
+  }
 
   steps.push({
     id: steps.length + 1,
     phase: 'conclusion',
-    title: `Conclusión: óptimo entero ${bestXStr}, Z = ${best ? best.z.toString() : '—'}`,
-    explanation:
-      `Todos los subproblemas del árbol han sido explorados o podados. La búsqueda finaliza con éxito. La solución óptima entera del problema es x = ${bestXStr} con un valor de función objetivo Z = ${bestZStr}.`,
-    calculation: `Solución óptima entera:\nx* = ${bestXStr}\nZ* = ${bestZStr}\nNodos explorados: ${nodes.length}`,
+    title: titulo,
+    explanation: explicacion,
+    calculation: calculo,
     state: {
       visibleNodeIds: nodes.map((n) => n.id),
       activeNodeId: bestNode ? bestNode.id : null,

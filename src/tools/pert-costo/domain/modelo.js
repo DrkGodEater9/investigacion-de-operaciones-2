@@ -75,9 +75,9 @@ export function normalizar(filas, { ci = '', fijo = '' } = {}) {
     let bien = true;
     const err = (m) => { errores.push({ fila: i, msg: m }); bien = false; };
 
-    if (dn == null) err(`Falta la duración normal de "${name}" (fila ${i + 1}).`);
+    if (dn == null) err(vacio(r.dn) ? `Falta la duración normal de "${name}" (fila ${i + 1}).` : `La duración normal de "${name}" no es un número.`);
     else if (dn < 0 || !Number.isInteger(dn)) err(`La duración normal de "${name}" debe ser un entero no negativo (usa una unidad menor, por ejemplo días en vez de semanas).`);
-    if (cn == null) err(`Falta el costo normal de "${name}" (fila ${i + 1}).`);
+    if (cn == null) err(vacio(r.cn) ? `Falta el costo normal de "${name}" (fila ${i + 1}).` : `El costo normal de "${name}" no es un número.`);
     else if (cn < 0) err(`El costo normal de "${name}" no puede ser negativo.`);
     if (!vacio(r.dl) && dl == null) err(`La duración límite de "${name}" no es un número.`);
     if (!vacio(r.cl) && cl == null) err(`El costo límite de "${name}" no es un número.`);
@@ -105,7 +105,7 @@ export function normalizar(filas, { ci = '', fijo = '' } = {}) {
   for (const a of actividades) {
     for (const p of a.preds) {
       if (p === a.name) errores.push({ fila: a.fila, msg: `"${a.name}" no puede depender de sí misma.` });
-      else if (!vistos.has(p)) errores.push({ fila: a.fila, msg: `"${a.name}" depende de "${p}", que no existe en la tabla.` });
+      else if (!vistos.has(p)) errores.push({ fila: a.fila, msg: `"${a.name}" depende de "${p}", que no existe en la tabla.${[...vistos.keys()].some((n) => /[\s,;]/.test(n)) ? ' Los nombres de actividad no deben llevar espacios, comas ni punto y coma si otras actividades dependen de ellas.' : ''}` });
     }
   }
   if (!errores.length) {

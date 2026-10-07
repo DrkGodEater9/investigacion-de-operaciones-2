@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, useCallback } from 'react';
+import { filtrar, propsEntero } from '@/shared/campos.js';
 import { TIPOS, ETIQUETAS, generarEjercicio, corregir } from '@/tools/arboles-decision/domain/generador.js';
 import { Ejercicio, Retroalimentacion, respuestaLista, respuestaParaCorregir } from '@/tools/arboles-decision/components/EjercicioArbol.jsx';
 import Segmented from '@/ui/Segmented.jsx';
@@ -62,7 +63,7 @@ export default function Practica() {
       <div className="ad-pr-barra">
         <form className="inline-field" onSubmit={usarSemilla}>
           <label htmlFor="ad-pr-semilla">Repetir semilla</label>
-          <input id="ad-pr-semilla" inputMode="numeric" value={entradaSemilla} onChange={(e) => setEntradaSemilla(e.target.value)} placeholder="4821" />
+          <input id="ad-pr-semilla" {...propsEntero} value={entradaSemilla} onChange={(e) => setEntradaSemilla(filtrar.semilla(e.target.value))} placeholder="4821" />
           <button type="submit" className="btn btn--sm">Ir</button>
         </form>
         <span className="ad-pr-sesion" aria-live="polite">Correctas: {sesion.a} de {sesion.b}</span>

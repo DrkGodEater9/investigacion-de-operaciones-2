@@ -54,7 +54,7 @@ const xs = (i) => `x${sub(i)}`;
 /** Convierte lo que escribió el estudiante a Fraction, o null si no se entiende. */
 export function leerNumero(texto) {
   if (texto === undefined || texto === null) return null;
-  const s = String(texto).trim().replace(/\s+/g, '').replace(/^\+/, '');
+  const s = String(texto).trim().replace(/\s+/g, '').replace(/[−–]/g, '-').replace(/^\+/, '');
   if (!s) return null;
   if (!/^-?(\d+([.,]\d+)?|[.,]\d+)(\/\d+([.,]\d+)?)?$/.test(s)) return null;
   try {

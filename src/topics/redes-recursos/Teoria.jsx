@@ -57,7 +57,7 @@ export default function Teoria() {
 
       <Section title="Nivelación de recursos">
         <p>
-          Se mueven actividades <em>no críticas</em> dentro de su holgura. Mientras cada una empiece después de que terminen sus predecesoras y termine antes de que empiecen sus sucesoras, el proyecto sigue durando lo mismo.
+          Se mueven actividades <em>no críticas</em> dentro de su holgura. Solo se acepta un movimiento si no sube el pico de consumo. Mientras cada una empiece después de que terminen sus predecesoras y termine antes de que empiecen sus sucesoras, el proyecto sigue durando lo mismo.
         </p>
         <ol>
           <li>Se parte del cronograma temprano.</li>
@@ -66,7 +66,7 @@ export default function Teoria() {
           <li>Se repite hasta que una pasada completa no mueva nada.</li>
         </ol>
         <p>
-          Ejemplo (bodega): siete actividades con una cuadrilla de obreros. El cronograma temprano dura {base1.T} períodos y pide 11, 9, 5, 4, 2, 2, 1 obreros: un pico de 11 al principio y casi nada al final. Las actividades B, F y G tienen holgura. Al nivelar se mueven B (de 0 a 4), F (de 4 a 5) y G (de 1 a 6): el consumo queda en 6, 6, 5, 4, 6, 2, 5, con pico 6 y la misma duración de {niv.T} períodos.
+          Ejemplo (bodega): siete actividades con una cuadrilla de obreros. El cronograma temprano dura {base1.T} períodos y pide 11, 9, 5, 4, 2, 2, 1 obreros: un pico de 11 al principio y casi nada al final. Varias actividades tienen holgura (entre otras B, F y G). Al nivelar se mueven B (de 0 a 4), F (de 4 a 5) y G (de 1 a 6): el consumo queda en 6, 6, 5, 4, 6, 2, 5, con pico 6 y la misma duración de {niv.T} períodos.
         </p>
         <Figure caption="Figura 2. Histograma de obreros de la bodega antes (arriba) y después de nivelar (abajo). La duración no cambia; el pico baja de 11 a 6.">
           <div className="rc-fig">
@@ -77,7 +77,7 @@ export default function Teoria() {
           </div>
         </Figure>
         <Callout tone="ojo" title="La nivelación no mira el límite">
-          Nivelar baja el pico, pero no garantiza quedar por debajo de un límite. Si después de nivelar el consumo sigue pasando el límite, hace falta la asignación con recursos limitados (que sí puede alargar el proyecto).
+          Nivelar nunca sube el pico y suele bajarlo, pero no garantiza quedar por debajo de un límite. Si después de nivelar el consumo sigue pasando el límite, hace falta la asignación con recursos limitados (que sí puede alargar el proyecto).
         </Callout>
       </Section>
 

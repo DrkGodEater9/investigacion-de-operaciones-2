@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { generateExercise, gradeExercise } from '@/tools/entera/domain/ejercicios.js';
+import { filtrar, restriccionSimple, propsEntero } from '@/shared/campos.js';
 import Segmented from '@/ui/Segmented.jsx';
 import '@/tools/entera/solver.css';
 
@@ -179,18 +180,20 @@ export default function Practica() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span>(</span>
                   <input
-                    type="number"
+                    type="text"
+                    {...propsEntero}
                     placeholder="x₁"
                     value={answersA.r1}
-                    onChange={(e) => setAnswersA({ ...answersA, r1: e.target.value })}
+                    onChange={(e) => setAnswersA({ ...answersA, r1: filtrar.entero(e.target.value, { negativo: true }) })}
                     style={{ width: '60px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                   />
                   <span>;</span>
                   <input
-                    type="number"
+                    type="text"
+                    {...propsEntero}
                     placeholder="x₂"
                     value={answersA.r2}
-                    onChange={(e) => setAnswersA({ ...answersA, r2: e.target.value })}
+                    onChange={(e) => setAnswersA({ ...answersA, r2: filtrar.entero(e.target.value, { negativo: true }) })}
                     style={{ width: '60px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                   />
                   <span>)</span>
@@ -230,26 +233,29 @@ export default function Practica() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span><em>x</em>* = (</span>
                   <input
-                    type="number"
+                    type="text"
+                    {...propsEntero}
                     placeholder="x₁*"
                     value={answersA.optX1}
-                    onChange={(e) => setAnswersA({ ...answersA, optX1: e.target.value })}
+                    onChange={(e) => setAnswersA({ ...answersA, optX1: filtrar.entero(e.target.value, { negativo: true }) })}
                     style={{ width: '60px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                   />
                   <span>;</span>
                   <input
-                    type="number"
+                    type="text"
+                    {...propsEntero}
                     placeholder="x₂*"
                     value={answersA.optX2}
-                    onChange={(e) => setAnswersA({ ...answersA, optX2: e.target.value })}
+                    onChange={(e) => setAnswersA({ ...answersA, optX2: filtrar.entero(e.target.value, { negativo: true }) })}
                     style={{ width: '60px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                   />
                   <span>) con <em>Z</em>* =</span>
                   <input
-                    type="number"
+                    type="text"
+                    {...propsEntero}
                     placeholder="Z*"
                     value={answersA.optZ}
-                    onChange={(e) => setAnswersA({ ...answersA, optZ: e.target.value })}
+                    onChange={(e) => setAnswersA({ ...answersA, optZ: filtrar.entero(e.target.value, { negativo: true }) })}
                     style={{ width: '70px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                   />
                 </div>
@@ -320,9 +326,11 @@ export default function Practica() {
                     <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Rama izquierda:</span>
                     <input
                       type="text"
+                      autoComplete="off"
+                      spellCheck={false}
                       placeholder="x1 <= 3"
                       value={answersB.leftBranch}
-                      onChange={(e) => setAnswersB({ ...answersB, leftBranch: e.target.value })}
+                      onChange={(e) => setAnswersB({ ...answersB, leftBranch: restriccionSimple(e.target.value) })}
                       style={{ width: '110px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                     />
                   </div>
@@ -330,9 +338,11 @@ export default function Practica() {
                     <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Rama derecha:</span>
                     <input
                       type="text"
+                      autoComplete="off"
+                      spellCheck={false}
                       placeholder="x1 >= 4"
                       value={answersB.rightBranch}
-                      onChange={(e) => setAnswersB({ ...answersB, rightBranch: e.target.value })}
+                      onChange={(e) => setAnswersB({ ...answersB, rightBranch: restriccionSimple(e.target.value) })}
                       style={{ width: '110px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                     />
                   </div>
@@ -445,26 +455,29 @@ export default function Practica() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span><em>x</em>₁* =</span>
                   <input
-                    type="number"
+                    type="text"
+                    {...propsEntero}
                     placeholder="x₁*"
                     value={answersC.optX1}
-                    onChange={(e) => setAnswersC({ ...answersC, optX1: e.target.value })}
+                    onChange={(e) => setAnswersC({ ...answersC, optX1: filtrar.entero(e.target.value, { negativo: true }) })}
                     style={{ width: '60px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                   />
                   <span>, <em>x</em>₂* =</span>
                   <input
-                    type="number"
+                    type="text"
+                    {...propsEntero}
                     placeholder="x₂*"
                     value={answersC.optX2}
-                    onChange={(e) => setAnswersC({ ...answersC, optX2: e.target.value })}
+                    onChange={(e) => setAnswersC({ ...answersC, optX2: filtrar.entero(e.target.value, { negativo: true }) })}
                     style={{ width: '60px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                   />
                   <span>con <em>Z</em>* =</span>
                   <input
-                    type="number"
+                    type="text"
+                    {...propsEntero}
                     placeholder="Z*"
                     value={answersC.optZ}
-                    onChange={(e) => setAnswersC({ ...answersC, optZ: e.target.value })}
+                    onChange={(e) => setAnswersC({ ...answersC, optZ: filtrar.entero(e.target.value, { negativo: true }) })}
                     style={{ width: '70px', padding: '4px 8px', border: '1px solid var(--rule-strong)', borderRadius: 'var(--radius)' }}
                   />
                 </div>

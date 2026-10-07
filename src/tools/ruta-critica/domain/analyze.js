@@ -3,7 +3,7 @@ import { buildNetwork } from './network.js';
 import { computeLayout } from './layout.js';
 import { computeTimes } from './cpm.js';
 import { expectedTime, variance } from './pert.js';
-import { enumerateRoutes } from './routes.js';
+import { enumerateRoutes, predecesorasDirectas } from './routes.js';
 import { buildSteps } from './steps.js';
 import { fmt } from './format.js';
 
@@ -23,6 +23,7 @@ export function analyze({ rows, mode, decimals }) {
 
   const net = buildNetwork(activities);
   let longest = 2;
+  const directos = predecesorasDirectas(activities);
   if (dur) {
     // Estimación del texto más largo dentro de un evento, para dimensionar los círculos.
     const sample = activities.reduce((s, a) => s + dur(a.name), 0);
@@ -42,9 +43,9 @@ export function analyze({ rows, mode, decimals }) {
   if (dur) {
     times = computeTimes(net, layout.numbered, dur);
     steps = buildSteps(net, layout, times, dur, decimals);
-    critical = enumerateRoutes(net, { dur, edgeOk: (e) => times.edgeInfo[e.id].critical, limit: 500 });
+    critical = enumerateRoutes(net, { dur, edgeOk: (e) => times.edgeInfo[e.id].critical, limit: 500, directos });
   }
-  const all = enumerateRoutes(net, { dur, limit: 3000 });
+  const all = enumerateRoutes(net, { dur, limit: 3000, directos });
 
   const notes = net.notes.map((x) => `En "${x.activity}" se omitió la predecesora "${x.removed}" porque ya está implícita a través de "${x.via}".`);
   return {

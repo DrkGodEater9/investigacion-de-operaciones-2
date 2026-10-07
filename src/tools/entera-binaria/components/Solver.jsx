@@ -111,9 +111,10 @@ export default function Solver() {
                     className="eb-textarea"
                     value={s.md}
                     rows={12}
+                    maxLength={20000}
                     spellCheck={false}
                     aria-label="Tabla Markdown del modelo"
-                    onChange={(e) => s.setMd(e.target.value)}
+                    onChange={(e) => s.setMd(e.target.value.slice(0, 20000))}
                   />
                   <p className="eb-nota">
                     Encabezado | Restricción | x1 | … | Signo | b |; la primera fila es el objetivo (max o min en la primera celda).

@@ -3,6 +3,7 @@ import { parseText } from '../../domain/parser.js';
 import { projectToMarkdown } from '../../domain/markdown.js';
 import { copyText } from '@/shared/files.js';
 
+const MAX_MD = 20000;
 const MODE_NAME = { network: 'solo la red', cpm: 'CPM', pert: 'PERT' };
 
 /** Editor Markdown en vivo: cada cambio reconstruye la red. */
@@ -40,7 +41,7 @@ export default function MarkdownPanel({ project, dispatch, notify }) {
 
   const openFile = async (file) => {
     if (!file) return;
-    onChange(await file.text());
+    onChange((await file.text()).slice(0, MAX_MD));
   };
 
   return (
@@ -50,7 +51,8 @@ export default function MarkdownPanel({ project, dispatch, notify }) {
         className="paste-area md-area"
         value={text}
         spellCheck={false}
-        onChange={(e) => onChange(e.target.value)}
+        maxLength={MAX_MD}
+        onChange={(e) => onChange(e.target.value.slice(0, MAX_MD))}
         aria-label="Tabla del ejercicio en Markdown"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { if (e.dataTransfer.files[0]) { e.preventDefault(); openFile(e.dataTransfer.files[0]); } }}

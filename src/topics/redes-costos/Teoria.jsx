@@ -128,7 +128,7 @@ export default function Teoria() {
         <ol>
           <li>Calcula la pendiente de cada actividad.</li>
           <li>Halla la ruta crítica con las duraciones actuales.</li>
-          <li>Acorta la actividad crítica de menor pendiente, siempre que todavía se pueda acortar. Acortar una actividad que no es crítica no baja la duración del proyecto.</li>
+          <li>Acorta la actividad crítica de menor pendiente, siempre que todavía se pueda acortar. Acortar una actividad que no es crítica no baja la duración del proyecto. Con una sola ruta crítica este criterio da el mínimo; con varias rutas críticas puede dar un costo mayor que el óptimo, y por eso a veces conviene deshacer una reducción anterior (ver el cuadro de abajo).</li>
           <li>Acórtala hasta que llegue a su duración límite o hasta que otra ruta se vuelva crítica; lo que ocurra primero.</li>
           <li>Recalcula la duración, el costo directo y el costo total, y repite.</li>
         </ol>

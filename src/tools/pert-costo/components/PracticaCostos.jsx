@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { filtrar } from '@/shared/campos.js';
 import Segmented from '@/ui/Segmented.jsx';
 import Toast from '@/ui/Toast.jsx';
 import StatusMark from '@/ui/StatusMark.jsx';
@@ -67,11 +68,13 @@ function Control({ ej, resp, onChange, bloqueado }) {
         type="text"
         inputMode="decimal"
         autoComplete="off"
+        spellCheck={false}
+       
         value={resp ?? ''}
         disabled={bloqueado}
         aria-invalid={invalido || undefined}
         aria-describedby={invalido ? `${nombre}-ayuda` : undefined}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(filtrar.decimal(e.target.value, { negativo: true }))}
       />
       {invalido && <span id={`${nombre}-ayuda`} className="pc-ayuda">Escribe un número, por ejemplo 12 o 12,5.</span>}
     </div>
@@ -131,7 +134,7 @@ export default function PracticaCostos() {
       <div className="pc-barra-p">
         <form className="inline-field" onSubmit={usarSemilla}>
           <label htmlFor="pc-semilla">Repetir semilla</label>
-          <input id="pc-semilla" inputMode="numeric" value={entradaSemilla} onChange={(e) => setEntradaSemilla(e.target.value)} placeholder="4821" />
+          <input id="pc-semilla" inputMode="numeric" autoComplete="off" spellCheck={false} aria-label="Semilla del ejercicio" value={entradaSemilla} onChange={(e) => setEntradaSemilla(filtrar.semilla(e.target.value))} placeholder="4821" />
           <button type="submit" className="btn btn--sm">Ir</button>
         </form>
         <span className="pc-sesion" aria-live="polite">Correctas: {sesion.a} de {sesion.b}</span>

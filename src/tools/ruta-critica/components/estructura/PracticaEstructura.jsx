@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, useCallback } from 'react';
+import { filtrar, propsEntero } from '@/shared/campos.js';
 import Segmented from '@/ui/Segmented.jsx';
 import Toast from '@/ui/Toast.jsx';
 import StatusMark from '@/ui/StatusMark.jsx';
@@ -56,12 +57,11 @@ function Control({ ej, resp, onChange, bloqueado }) {
         <input
           id={`${nombre}-n`}
           type="text"
-          inputMode="numeric"
-          autoComplete="off"
+          {...propsEntero}
           value={resp ?? ''}
           disabled={bloqueado}
           aria-invalid={invalido || undefined}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(filtrar.entero(e.target.value, { max: 4 }))}
         />
         {invalido && <span className="pe-ayuda">Escribe un número entero, por ejemplo 2.</span>}
       </div>
@@ -203,7 +203,7 @@ export default function PracticaEstructura() {
       <div className="pe-barra">
         <form className="inline-field" onSubmit={usarSemilla}>
           <label htmlFor="pe-semilla">Repetir semilla</label>
-          <input id="pe-semilla" inputMode="numeric" value={entradaSemilla} onChange={(e) => setEntradaSemilla(e.target.value)} placeholder="4821" />
+          <input id="pe-semilla" {...propsEntero} value={entradaSemilla} onChange={(e) => setEntradaSemilla(filtrar.semilla(e.target.value))} placeholder="4821" />
           <button type="submit" className="btn btn--sm">Ir</button>
         </form>
         <span className="pe-sesion" aria-live="polite">Correctas: {sesion.a} de {sesion.b}</span>

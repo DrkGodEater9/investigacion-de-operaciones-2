@@ -115,7 +115,9 @@ export function parsearTexto(src) {
   return { arbol: raiz && errores.length === 0 ? { sense, unidad, raiz } : null, errores };
 }
 
-const nombreTxt = (n) => (n.nombre ? ` ${n.nombre}` : '');
+/** Nombre apto para el texto: sin «|» ni saltos de línea, y sin que parezca un comentario (# o //). */
+const limpio = (t) => String(t ?? '').replace(/\s*[|\r\n]+\s*/g, ' / ').trim().replace(/^(#|\/\/)/, '· $1');
+const nombreTxt = (n) => (limpio(n.nombre) ? ` ${limpio(n.nombre)}` : '');
 const num = (v) => (typeof v === 'number' ? fmtTexto(v) : String(v ?? '').trim());
 const vacioTxt = (v) => v === undefined || v === null || String(v).trim() === '';
 
@@ -127,7 +129,7 @@ export function arbolATexto(arbol) {
     const pad = '  '.repeat(nivel);
     out.push(`${pad}- [${n.tipo === 'azar' ? 'A' : 'D'}]${nombreTxt(n)}`);
     n.ramas.forEach((r) => {
-      const campos = [r.etiqueta];
+      const campos = [limpio(r.etiqueta)];
       if (n.tipo === 'azar' && !vacioTxt(r.p)) campos.push(`p ${num(r.p)}`);
       const pagoCero = !vacioTxt(r.pago) && Number(String(r.pago).replace(',', '.')) === 0;
       const conPago = !vacioTxt(r.pago) && (!pagoCero || (r.hijo?.tipo === 'final' && vacioTxt(r.hijo.valor)));

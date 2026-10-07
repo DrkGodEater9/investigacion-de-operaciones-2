@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { MAX_ALT, MAX_EST, MAX_IND } from '../domain/bayes.js';
 import { leerNumero } from '../domain/entrada.js';
 import { fmtNum } from '../domain/formato.js';
+import { etiqueta, filtrar, probabilidad, propsNumero } from '@/shared/campos.js';
+
+const NOMBRE = { max: 40 };
 
 /** Suma de una fila de probabilidades escritas como texto; null si alguna no se puede leer. */
 function sumaTexto(fila) {
@@ -52,7 +55,7 @@ export default function EditorProblema({ draft, acciones: a }) {
               <th scope="col">Alternativa</th>
               {draft.estados.map((e, j) => (
                 <th scope="col" key={j}>
-                  <input className="bz-in bz-in--nombre" value={e} spellCheck={false} aria-label={`Nombre del estado ${j + 1}`} onChange={(ev) => a.setEstado(j, ev.target.value)} />
+                  <input className="bz-in bz-in--nombre" value={e} autoComplete="off" spellCheck={false} aria-label={`Nombre del estado ${j + 1}`} onChange={(ev) => a.setEstado(j, etiqueta(ev.target.value, NOMBRE))} />
                 </th>
               ))}
             </tr>
@@ -61,11 +64,11 @@ export default function EditorProblema({ draft, acciones: a }) {
             {draft.alts.map((alt, i) => (
               <tr key={i}>
                 <td>
-                  <input className="bz-in bz-in--fila" value={alt} spellCheck={false} aria-label={`Nombre de la alternativa ${i + 1}`} onChange={(ev) => a.setAlt(i, ev.target.value)} />
+                  <input className="bz-in bz-in--fila" value={alt} autoComplete="off" spellCheck={false} aria-label={`Nombre de la alternativa ${i + 1}`} onChange={(ev) => a.setAlt(i, etiqueta(ev.target.value, NOMBRE))} />
                 </td>
                 {draft.pagos[i].map((v, j) => (
                   <td key={j}>
-                    <input className="bz-in bz-in--num" inputMode="decimal" value={v} placeholder="0" aria-label={`Pago de ${alt || 'alternativa ' + (i + 1)} con ${draft.estados[j] || 'estado ' + (j + 1)}`} onChange={(ev) => a.setPago(i, j, ev.target.value)} />
+                    <input className="bz-in bz-in--num" {...propsNumero} value={v} placeholder="0" aria-label={`Pago de ${alt || 'alternativa ' + (i + 1)} con ${draft.estados[j] || 'estado ' + (j + 1)}`} onChange={(ev) => a.setPago(i, j, filtrar.decimal(ev.target.value, { negativo: true }))} />
                   </td>
                 ))}
               </tr>
@@ -74,7 +77,7 @@ export default function EditorProblema({ draft, acciones: a }) {
               <td className="bz-celda-nota">Prob. a priori</td>
               {draft.priori.map((v, j) => (
                 <td key={j}>
-                  <input className="bz-in bz-in--num" inputMode="decimal" value={v} placeholder="0,5" aria-label={`Probabilidad a priori de ${draft.estados[j] || 'estado ' + (j + 1)}`} onChange={(ev) => a.setPriori(j, ev.target.value)} />
+                  <input className="bz-in bz-in--num" {...propsNumero} value={v} placeholder="0,5" aria-label={`Probabilidad a priori de ${draft.estados[j] || 'estado ' + (j + 1)}`} onChange={(ev) => a.setPriori(j, probabilidad(ev.target.value))} />
                 </td>
               ))}
             </tr>
@@ -106,7 +109,7 @@ export default function EditorProblema({ draft, acciones: a }) {
                   <th scope="col">Estado</th>
                   {draft.inds.map((z, k) => (
                     <th scope="col" key={k}>
-                      <input className="bz-in bz-in--nombre" value={z} spellCheck={false} aria-label={`Nombre del resultado ${k + 1} del indicador`} onChange={(ev) => a.setInd(k, ev.target.value)} />
+                      <input className="bz-in bz-in--nombre" value={z} autoComplete="off" spellCheck={false} aria-label={`Nombre del resultado ${k + 1} del indicador`} onChange={(ev) => a.setInd(k, etiqueta(ev.target.value, NOMBRE))} />
                     </th>
                   ))}
                   <th scope="col">Suma</th>
@@ -118,7 +121,7 @@ export default function EditorProblema({ draft, acciones: a }) {
                     <td className="bz-celda-nota" style={{ textAlign: 'left' }}>{e || `Estado ${j + 1}`}</td>
                     {draft.lik[j].map((v, k) => (
                       <td key={k}>
-                        <input className="bz-in bz-in--num" inputMode="decimal" value={v} placeholder="0" aria-label={`Probabilidad de ${draft.inds[k] || 'resultado ' + (k + 1)} si el estado es ${e || j + 1}`} onChange={(ev) => a.setLik(j, k, ev.target.value)} />
+                        <input className="bz-in bz-in--num" {...propsNumero} value={v} placeholder="0" aria-label={`Probabilidad de ${draft.inds[k] || 'resultado ' + (k + 1)} si el estado es ${e || j + 1}`} onChange={(ev) => a.setLik(j, k, probabilidad(ev.target.value))} />
                       </td>
                     ))}
                     <Suma valor={sumaTexto(draft.lik[j])} />
@@ -132,7 +135,7 @@ export default function EditorProblema({ draft, acciones: a }) {
             <button type="button" className="btn btn--sm" onClick={a.quitarInd} disabled={K <= 2}>Quitar resultado</button>
             <label className="inline-field">
               Fiabilidad
-              <input className="bz-in bz-in--fia" inputMode="decimal" value={fia} onChange={(e) => setFia(e.target.value)} aria-label="Fiabilidad del indicador" />
+              <input className="bz-in bz-in--fia" {...propsNumero} value={fia} onChange={(e) => setFia(probabilidad(e.target.value))} aria-label="Fiabilidad del indicador" />
             </label>
             <button type="button" className="btn btn--sm" onClick={aplicarFia} disabled={!fiaValida}>Llenar con fiabilidad</button>
           </div>

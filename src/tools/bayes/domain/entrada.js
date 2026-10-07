@@ -20,13 +20,15 @@
  */
 import { validarProblema } from './bayes.js';
 
+/** Fila de probabilidades a priori: «Prob.», «Prob», «Probabilidad(es)…»; no «Probar sensor». */
+const ESTILO_PRIORI = /^prob(\.|abilidad(es)?\b|\b)/i;
 const MILES = /^[+-]?[1-9]\d{0,2}([.,]\d{3})+$/;
 const NUMERO = /^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i;
 
 /** → { valor } o { error }. Con esProb acepta «25 %» y «1/4». */
 export function leerNumero(texto, esProb = false) {
   const original = String(texto ?? '').trim();
-  const t = original.replace(/−/g, '-').replace(/\s+/g, '');
+  const t = original.replace(/[−–—]/g, '-').replace(/\s+/g, '');
   if (t === '') return { error: 'está vacío' };
   if (esProb) {
     const pct = /^([+-]?[\d.,]+)%$/.exec(t);
@@ -95,7 +97,7 @@ export function parseMarkdown(texto) {
   const pagos = [];
   let priori = null;
   t1.slice(1).forEach((cs, idx) => {
-    const esPriori = /^prob/i.test(cs[0] || '');
+    const esPriori = ESTILO_PRIORI.test(cs[0] || '');
     const etiqueta = cs[0] || `fila ${idx + 1}`;
     if (cs.length !== n + 1) {
       errores.push(`Tabla de pagos, fila «${etiqueta}»: se esperaban ${n + 1} columnas y llegaron ${cs.length}.`);

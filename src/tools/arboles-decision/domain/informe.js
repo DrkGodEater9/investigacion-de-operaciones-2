@@ -85,7 +85,8 @@ function csv(headers, rows) {
 export const construirCSV = ({ arbol, ev }) => { const t = tablaNodos(arbol, ev, crudo); return csv(t.headers, t.rows); };
 
 const tablaMd = (headers, rows) => {
-  const line = (r) => '| ' + r.map((c) => String(c ?? '')).join(' | ') + ' |';
+  const celda = (c) => String(c ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+  const line = (r) => '| ' + r.map(celda).join(' | ') + ' |';
   return [line(headers), '|' + headers.map(() => '---').join('|') + '|', ...rows.map(line)].join('\n');
 };
 

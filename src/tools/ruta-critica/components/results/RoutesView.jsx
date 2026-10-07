@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { filtrar } from '@/shared/campos.js';
 import { fmt } from '../../domain/format.js';
 
 export default function RoutesView({ analysis, selectedRoute, onSelectRoute }) {
@@ -40,7 +41,7 @@ export default function RoutesView({ analysis, selectedRoute, onSelectRoute }) {
         </h3>
         <label className="inline-field">
           Que pasen por
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Actividad" size="8" />
+          <input value={query} onChange={(e) => setQuery(filtrar.nombre(e.target.value))} placeholder="Actividad" size="8" autoComplete="off" spellCheck={false} aria-label="Buscar actividad" />
         </label>
       </div>
       {all.truncated && <p className="table-note">La red tiene muchísimas rutas; se listan las primeras {all.routes.length}.</p>}

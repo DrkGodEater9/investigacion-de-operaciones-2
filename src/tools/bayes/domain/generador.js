@@ -73,7 +73,7 @@ const CONTEXTOS = [
   },
   {
     nombre: 'Inventario', objetivo: 'min', unidad: 'miles de pesos (costos)',
-    intro: 'Una tienda decide cuánto mercancía pedir; los pagos son costos totales y se busca el menor costo esperado.',
+    intro: 'Una tienda decide cuánta mercancía pedir; los pagos son costos totales y se busca el menor costo esperado.',
     alternativas: ['Pedir poco', 'Pedir una cantidad media', 'Pedir mucho'],
     estados: { 2: ['Demanda baja', 'Demanda alta'], 3: ['Demanda baja', 'Demanda media', 'Demanda alta'] },
     indicadores: { 2: ['Pronóstico bajo', 'Pronóstico alto'], 3: ['Pronóstico bajo', 'Pronóstico medio', 'Pronóstico alto'] },
@@ -385,8 +385,10 @@ const cerca = (x, y, tol) => Math.abs(x - y) <= tol;
 const tolDe = (tipo, sol) => {
   if (tipo === 'posterior' || tipo === 'marginal') return 0.0051;
   if (tipo === 'eficiencia') return 1;
-  if (tipo === 'veim') return Math.max(0.2, 0.005 * Math.abs(sol));
-  return Math.max(0.06, 0.002 * Math.abs(sol));
+  // VEIM: absorbe posteriores redondeadas a 3-4 decimales, pero sin llegar a 0,5 (otra respuesta distinta).
+  if (tipo === 'veim') return Math.min(0.3, Math.max(0.2, 0.005 * Math.abs(sol)));
+  // valorEsperado y veip son múltiplos exactos de 0,5: la tolerancia no puede llegar a 0,5 o aceptaría una respuesta distinta.
+  return Math.max(0.06, Math.min(0.002 * Math.abs(sol), 0.2));
 };
 
 /** Pista de qué error cometió la persona, a partir de cifras típicas con las que su respuesta coincide. */
@@ -396,6 +398,10 @@ function diagnosticoNumerico(ej, resp, a, tol) {
   const m = a.muestral;
   const pistas = [];
   const es = (v) => v !== null && v !== undefined && Number.isFinite(v) && cerca(resp, v, tol);
+  if ((ej.tipo === 'posterior' || ej.tipo === 'marginal') && resp > 1 && resp <= 100) {
+    const sol = ej.tipo === 'posterior' ? m.posterior[d.j][d.k] : m.marginal[d.k];
+    if (cerca(resp / 100, sol, tol)) pistas.push(`Parece que lo escribiste como porcentaje (${fmtNum(resp)} %). Se pide el decimal: ${fmtNum(sol)}.`);
+  }
   switch (ej.tipo) {
     case 'valorEsperado': {
       const prom = p.pagos[d.i].reduce((s, v) => s + v, 0) / p.estados.length;

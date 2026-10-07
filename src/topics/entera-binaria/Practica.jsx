@@ -5,6 +5,7 @@ import Retroalimentacion from '@/tools/entera-binaria/components/Retroalimentaci
 import { respuestaLista, respuestaParaCorregir } from '@/tools/entera-binaria/components/ControlRespuesta.jsx';
 import Segmented from '@/ui/Segmented.jsx';
 import Toast from '@/ui/Toast.jsx';
+import { filtrar, alCambiar, propsEntero } from '@/shared/campos.js';
 import { useProgress } from '@/app/ProgressContext.jsx';
 import { hrefTopic } from '@/app/router.js';
 import '@/tools/entera-binaria/practica.css';
@@ -67,7 +68,7 @@ export default function Practica() {
       <div className="pb-barra">
         <form className="inline-field" onSubmit={usarSemilla}>
           <label htmlFor="pb-semilla">Repetir semilla</label>
-          <input id="pb-semilla" inputMode="numeric" value={entradaSemilla} onChange={(e) => setEntradaSemilla(e.target.value)} placeholder="4821" />
+          <input id="pb-semilla" {...propsEntero} value={entradaSemilla} onChange={alCambiar(filtrar.semilla, setEntradaSemilla)} placeholder="4821" />
           <button type="submit" className="btn btn--sm">Ir</button>
         </form>
         <span className="pb-sesion" aria-live="polite">Correctas: {sesion.a} de {sesion.b}</span>

@@ -102,7 +102,8 @@ export default function Solver() {
                     rows={12}
                     spellCheck={false}
                     aria-label="Tabla Markdown del proyecto"
-                    onChange={(e) => s.setMd(e.target.value)}
+                    maxLength={20000}
+                    onChange={(e) => s.setMd(e.target.value.slice(0, 20000))}
                   />
                   <p className="rc-nota">
                     Encabezado | Actividad | Duración | Predecesoras | recurso … |; la fila «Límite» trae las unidades disponibles por período.

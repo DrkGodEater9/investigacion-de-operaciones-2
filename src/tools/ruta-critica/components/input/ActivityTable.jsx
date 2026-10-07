@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { filtrar, propsNumero } from '@/shared/campos.js';
 
 const COLS = {
   network: [],
@@ -64,8 +65,10 @@ export default function ActivityTable({ project, dispatch, errorRows, hoveredAct
                   <input
                     data-field="name"
                     value={row.name}
+                    autoComplete="off"
+                    spellCheck={false}
                     aria-label={`Nombre de la actividad, fila ${i + 1}`}
-                    onChange={(e) => dispatch({ type: 'update', id: row.id, field: 'name', value: e.target.value })}
+                    onChange={(e) => dispatch({ type: 'update', id: row.id, field: 'name', value: filtrar.nombre(e.target.value) })}
                     onKeyDown={(e) => onKey(e, row, 'name')}
                   />
                 </td>
@@ -74,8 +77,10 @@ export default function ActivityTable({ project, dispatch, errorRows, hoveredAct
                     data-field="preds"
                     value={row.preds}
                     placeholder="-"
+                    autoComplete="off"
+                    spellCheck={false}
                     aria-label={`Predecesoras de ${name || 'la fila ' + (i + 1)}`}
-                    onChange={(e) => dispatch({ type: 'update', id: row.id, field: 'preds', value: e.target.value })}
+                    onChange={(e) => dispatch({ type: 'update', id: row.id, field: 'preds', value: filtrar.listaNombres(e.target.value) })}
                     onKeyDown={(e) => onKey(e, row, 'preds')}
                   />
                 </td>
@@ -84,10 +89,10 @@ export default function ActivityTable({ project, dispatch, errorRows, hoveredAct
                     <input
                       data-field={c.key}
                       className="num"
-                      inputMode="decimal"
+                      {...propsNumero}
                       value={row[c.key]}
                       aria-label={`${c.hint} de ${name || 'la fila ' + (i + 1)}`}
-                      onChange={(e) => dispatch({ type: 'update', id: row.id, field: c.key, value: e.target.value })}
+                      onChange={(e) => dispatch({ type: 'update', id: row.id, field: c.key, value: filtrar.decimal(e.target.value, { max: 12 }) })}
                       onKeyDown={(e) => onKey(e, row, c.key)}
                     />
                   </td>

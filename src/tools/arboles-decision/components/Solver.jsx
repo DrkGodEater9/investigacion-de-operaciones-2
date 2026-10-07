@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { filtrar } from '@/shared/campos.js';
 import Segmented from '@/ui/Segmented.jsx';
 import Tabs from '@/ui/Tabs.jsx';
 import Toast from '@/ui/Toast.jsx';
@@ -105,7 +106,7 @@ export default function Solver() {
                 />
                 <label className="inline-field">
                   Unidad
-                  <input className="ad-in ad-in--unidad" value={s.unidad} placeholder="millones de pesos" aria-label="Unidad de los pagos" onChange={(e) => s.acciones.setUnidad(e.target.value)} />
+                  <input className="ad-in ad-in--unidad" value={s.unidad} placeholder="millones de pesos" aria-label="Unidad de los pagos" autoComplete="off" spellCheck={false} onChange={(e) => s.acciones.setUnidad(filtrar.texto1(e.target.value, { max: 40 }))} />
                 </label>
               </div>
 
@@ -127,6 +128,8 @@ export default function Solver() {
                     className="ad-textarea"
                     value={s.texto}
                     rows={14}
+                    maxLength={20000}
+                    autoComplete="off"
                     spellCheck={false}
                     aria-label="Árbol en texto indentado"
                     onChange={(e) => s.setTexto(e.target.value)}

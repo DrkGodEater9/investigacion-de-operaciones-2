@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Segmented from '@/ui/Segmented.jsx';
 import Tabs from '@/ui/Tabs.jsx';
 import Toast from '@/ui/Toast.jsx';
+import { filtrar } from '@/shared/campos.js';
 import { copyText } from '@/shared/files.js';
 import { aMarkdown } from '../domain/entrada.js';
 import { useProyecto } from '../hooks/useProyecto.js';
@@ -98,15 +99,15 @@ export default function Solver() {
                   <div className="pc-parametros">
                     <label className="pc-campo">
                       <span>Título</span>
-                      <input className="pc-in pc-in--titulo" value={p.titulo} onChange={(e) => p.setTitulo(e.target.value)} />
+                      <input className="pc-in pc-in--titulo" autoComplete="off" value={p.titulo} onChange={(e) => p.setTitulo(filtrar.texto1(e.target.value))} />
                     </label>
                     <label className="pc-campo">
                       <span>Costo indirecto por unidad de tiempo</span>
-                      <input className="pc-in pc-in--num" inputMode="decimal" value={p.ci} onChange={(e) => p.setCi(e.target.value)} aria-invalid={!p.ci.trim() || undefined} />
+                      <input className="pc-in pc-in--num" inputMode="decimal" autoComplete="off" spellCheck={false} value={p.ci} onChange={(e) => p.setCi(filtrar.decimal(e.target.value))} aria-invalid={!p.ci.trim() || undefined} />
                     </label>
                     <label className="pc-campo">
                       <span>Costo indirecto fijo (opcional)</span>
-                      <input className="pc-in pc-in--num" inputMode="decimal" value={p.fijo} onChange={(e) => p.setFijo(e.target.value)} />
+                      <input className="pc-in pc-in--num" inputMode="decimal" autoComplete="off" spellCheck={false} value={p.fijo} onChange={(e) => p.setFijo(filtrar.decimal(e.target.value))} />
                     </label>
                   </div>
                   <EditorTabla filas={p.filas} acciones={p.acciones} filasConError={erroresFila} />
@@ -119,7 +120,8 @@ export default function Solver() {
                     rows={12}
                     spellCheck={false}
                     aria-label="Proyecto en Markdown"
-                    onChange={(e) => p.setMd(e.target.value)}
+                    maxLength={20000}
+                    onChange={(e) => p.setMd(e.target.value.slice(0, 20000))}
                   />
                   <p className="pc-nota">
                     Un título con #, las líneas «Costo indirecto por unidad de tiempo: …» y «Costo indirecto fijo: …», y una tabla con Actividad, Predecesoras, Duración normal, Costo normal, Duración límite y Costo límite.
@@ -130,7 +132,7 @@ export default function Solver() {
 
               <label className="pc-campo pc-campo--objetivo">
                 <span>Duración objetivo (opcional): ¿cuánto cuesta terminar en…?</span>
-                <input className="pc-in pc-in--num" inputMode="numeric" value={p.objetivo} onChange={(e) => p.setObjetivo(e.target.value)} placeholder="por ejemplo 20" />
+                <input className="pc-in pc-in--num" inputMode="numeric" autoComplete="off" spellCheck={false} value={p.objetivo} onChange={(e) => p.setObjetivo(filtrar.entero(e.target.value))} placeholder="por ejemplo 20" />
               </label>
             </>
           )}

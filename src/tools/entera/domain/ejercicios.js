@@ -18,6 +18,40 @@ export function createPRNG(seed) {
 }
 
 /**
+ * Lee un entero escrito por el estudiante: acepta «3», «+3», «3,0» y «3.0», pero NO «3,5» (parseInt lo habría
+ * leído como 3). Devuelve NaN si está vacío o no es un entero.
+ */
+export function leerEntero(v) {
+  if (typeof v === 'number') return Number.isInteger(v) ? v : NaN;
+  if (v === undefined || v === null) return NaN;
+  const s = String(v).trim().replace(/\s+/g, '').replace('−', '-');
+  if (!/^[+-]?\d+([.,]0*)?$/.test(s)) return NaN;
+  return parseInt(s, 10);
+}
+
+/** true si el decimal con 2 cifras ocultaría que el valor no es entero (p. ej. 23,996 se mostraría como «24»). */
+const decimalOculta = (f) => !f.isInteger() && !f.toDecimal().includes(',');
+
+/** true si la parte fraccionaria es exactamente 1/2: el «entero más cercano» no sería único. */
+const esMedio = (f) => f.fractionalPart().eq(frac('1/2'));
+
+/**
+ * La relajación de 2 variables tiene un único óptimo salvo que una restricción activa sea paralela a la función
+ * objetivo (toda una arista es óptima y «la solución de la relajación» sería ambigua para el estudiante).
+ */
+export function relajacionUnica(model, lp) {
+  const c1 = frac(model.c[0]);
+  const c2 = frac(model.c[1]);
+  for (const ct of model.constraints) {
+    const a1 = frac(ct.a[0]);
+    const a2 = frac(ct.a[1]);
+    if (!a1.mul(c2).sub(a2.mul(c1)).isZero()) continue;
+    if (a1.mul(lp.x[0]).add(a2.mul(lp.x[1])).eq(frac(ct.b))) return false;
+  }
+  return true;
+}
+
+/**
  * Verifica por fuerza bruta en la retícula de enteros que la solución entera óptima sea ÚNICA.
  * @param {Object} model
  * @param {Object} result - Resultado de solveIP
@@ -215,6 +249,11 @@ export function generateExerciseA(seed = 1) {
     // Regla: la relajación NO debe ser entera
     if (rootLP.x[0].isInteger() && rootLP.x[1].isInteger()) continue;
 
+    // Regla: el entero más cercano debe estar bien definido (sin empates en x,5) y los decimales no deben ocultar fracciones
+    if (esMedio(rootLP.x[0]) || esMedio(rootLP.x[1])) continue;
+    if (!relajacionUnica(model, rootLP)) continue;
+    if (decimalOculta(rootLP.x[0]) || decimalOculta(rootLP.x[1]) || decimalOculta(rootLP.z)) continue;
+
     const ipResult = solveIP(model);
     if (ipResult.status !== 'optimal' || !ipResult.best) continue;
 
@@ -352,6 +391,8 @@ export function generateExerciseB(seed = 1) {
 
     // Evitar empates ambiguos para que la regla se aprecie con total claridad
     if (frac1.eq(frac2)) continue;
+    if (!relajacionUnica(model, rootLP)) continue;
+    if (decimalOculta(rootLP.x[0]) || decimalOculta(rootLP.x[1]) || decimalOculta(rootLP.z)) continue;
 
     const branchVar = frac1.gt(frac2) ? 'x1' : 'x2';
     const chosenVal = branchVar === 'x1' ? rootLP.x[0] : rootLP.x[1];
@@ -363,11 +404,15 @@ export function generateExerciseB(seed = 1) {
     const p2Node = ipResult.nodes.find((n) => n.parentId === 0 && n.branchOp === '>=');
 
     if (!p1Node || !p2Node) continue;
+    if ([p1Node, p2Node].some((nd) => nd.status !== 'infeasible' && (nd.x.some(decimalOculta) || decimalOculta(nd.z)))) continue;
 
+    // Lo que el estudiante puede decidir en este nivel: solo conoce la solución de los dos hijos. Un hijo
+    // fraccionario se poda por cota únicamente si el hermano es entero y su Z no lo supera.
     const classifyChild = (node) => {
       if (node.status === 'infeasible') return 'infactible';
       if (node.status === 'integer' || node.action === 'incumbent') return 'entera';
-      if (node.action === 'pruned-bound') return 'cota';
+      const inc = node.incumbentAfter;
+      if (inc && node.z.floor() <= inc.floor()) return 'cota';
       return 'ramificar';
     };
 
@@ -471,7 +516,7 @@ export function generateExerciseC(seed = 1) {
   const ipResult = solveIP(model);
 
   // Asegurar que la relajación sea fraccionaria y el óptimo entero sea único
-  const isFractional = rootLP.status === 'optimal' && (!rootLP.x[0].isInteger() || !rootLP.x[1].isInteger());
+  const isFractional = rootLP.status === 'optimal' && (!rootLP.x[0].isInteger() || !rootLP.x[1].isInteger()) && relajacionUnica(model, rootLP);
   const isUnique = ipResult.status === 'optimal' && hasUniqueIntegerOptimum(model, ipResult);
 
   // Si no cumple, usamos los valores base de la plantilla que garantizan unicidad
@@ -598,17 +643,17 @@ export function gradeExercise(exercise, userAnswers = {}) {
     case 'A': {
       const { nearestRounding, optimal } = exercise;
 
-      const userR1 = parseInt(userAnswers.r1, 10);
-      const userR2 = parseInt(userAnswers.r2, 10);
+      const userR1 = leerEntero(userAnswers.r1);
+      const userR2 = leerEntero(userAnswers.r2);
       const userIsFeasible = userAnswers.isFeasible; // true o false (booleano)
-      const userOptX1 = parseInt(userAnswers.optX1, 10);
-      const userOptX2 = parseInt(userAnswers.optX2, 10);
-      const userOptZ = parseInt(userAnswers.optZ, 10);
+      const userOptX1 = leerEntero(userAnswers.optX1);
+      const userOptX2 = leerEntero(userAnswers.optX2);
+      const userOptZ = leerEntero(userAnswers.optZ);
 
       const rMatch = userR1 === nearestRounding.x1 && userR2 === nearestRounding.x2;
       const feasMatch = userIsFeasible === nearestRounding.isFeasible;
       const optXMatch = userOptX1 === optimal.x1 && userOptX2 === optimal.x2;
-      const optZMatch = !Number.isNaN(userOptZ) ? userOptZ === optimal.z : true;
+      const optZMatch = userOptZ === optimal.z;
 
       const explanations = [];
 
@@ -700,13 +745,13 @@ export function gradeExercise(exercise, userAnswers = {}) {
     case 'C': {
       const { correctOptionIndex, options, optimal } = exercise;
 
-      const userOpt = parseInt(userAnswers.optionIndex, 10);
-      const userOptX1 = parseInt(userAnswers.optX1, 10);
-      const userOptX2 = parseInt(userAnswers.optX2, 10);
-      const userOptZ = parseInt(userAnswers.optZ, 10);
+      const userOpt = leerEntero(userAnswers.optionIndex);
+      const userOptX1 = leerEntero(userAnswers.optX1);
+      const userOptX2 = leerEntero(userAnswers.optX2);
+      const userOptZ = leerEntero(userAnswers.optZ);
 
       const modelMatch = userOpt === correctOptionIndex;
-      const optMatch = userOptX1 === optimal.x1 && userOptX2 === optimal.x2 && (!Number.isNaN(userOptZ) ? userOptZ === optimal.z : true);
+      const optMatch = userOptX1 === optimal.x1 && userOptX2 === optimal.x2 && userOptZ === optimal.z;
 
       const explanations = [];
 

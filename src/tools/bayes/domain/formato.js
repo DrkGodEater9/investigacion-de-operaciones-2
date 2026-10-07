@@ -1,11 +1,14 @@
 /** Formato de números para la pantalla (coma decimal, signo menos tipográfico). Funciones puras. */
 
+/** Redondeo «half up» que no falla con errores de coma flotante (0,09374999… cuenta como 0,09375). */
+const redondea = (x, f) => Math.round(x * f + Math.sign(x) * 1e-6) / f;
+
 /** Número con hasta 4 decimales, sin ceros finales, coma decimal y «−» para los negativos. */
 export function fmtNum(x) {
   if (x === null || x === undefined || Number.isNaN(x)) return '—';
   if (!Number.isFinite(x)) return String(x);
   if (Math.abs(x) >= 1e12) return String(x).replace('.', ',').replace('-', '−');
-  let r = Math.round(x * 1e4) / 1e4;
+  let r = redondea(x, 1e4);
   if (r === 0) r = 0; // evita «-0»
   return String(r).replace('.', ',').replace('-', '−');
 }
@@ -18,7 +21,7 @@ export function fmtFactor(x) {
 /** Porcentaje con hasta 1 decimal: 0,4643 → «46,4 %». */
 export function fmtPct(x) {
   if (x === null || x === undefined || !Number.isFinite(x)) return '—';
-  let r = Math.round(x * 1000) / 10;
+  let r = redondea(x * 100, 1e1);
   if (r === 0) r = 0;
   return String(r).replace('.', ',').replace('-', '−') + ' %';
 }
