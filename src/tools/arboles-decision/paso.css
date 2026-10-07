@@ -1,0 +1,33 @@
+/* Paso a paso (tema 2.2). Solo lo que base.css no trae; variables de base.css. */
+.ad-ps-root { display: flex; flex-direction: column; gap: 16px; padding: 0 0 40px; min-width: 0; }
+.ad-ps-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.ad-ps-head h2 { margin: 0; font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--ink); }
+.ad-ps-tag { font-size: 12px; color: var(--muted); border: 1px solid var(--rule); padding: 2px 8px; border-radius: var(--radius); background: var(--wash); }
+.ad-ps-selectores { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; min-width: 0; }
+.ad-ps-selectores .segmented { max-width: 100%; flex-wrap: wrap; }
+.ad-ps-modelo { border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ad-ps-modelo p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+.ad-ps-nota { color: var(--muted); font-size: 13px !important; }
+.ad-ps-bar { border: 1px solid var(--rule); border-radius: var(--radius); padding: 10px 14px; display: grid; gap: 8px; background: #fafaf8; }
+.ad-ps-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ad-ps-count { margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 500; }
+.ad-ps-range { width: 100%; accent-color: var(--accent); cursor: pointer; height: 6px; }
+.ad-ps-main { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.ad-ps-card, .ad-ps-panel { border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.ad-ps-card h3 { margin: 0; font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--ink); }
+.ad-ps-card p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink); }
+.ad-ps-calc { background: #fbfbf9; border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 10px 14px; font-family: var(--serif); font-size: 14.5px; line-height: 1.55; overflow-wrap: anywhere; }
+.ad-ps-calc div + div { margin-top: 3px; }
+.ad-ps-panel h4 { margin: 0; font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+.ad-ps-arbol { overflow-x: auto; max-width: 100%; position: relative; }
+.ad-ps-resumen { border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 8px 12px; font-family: var(--serif); font-size: 15px; background: #fbfbf9; }
+.ad-ps-resumen strong { font-family: var(--ui); font-size: 12px; display: block; color: var(--muted); font-weight: 600; }
+@media (max-width: 900px) {
+  .ad-ps-main { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .ad-ps-count { margin-left: 0; width: 100%; }
+  .ad-ps-controls .icon-btn, .ad-ps-controls .btn { min-height: 36px; }
+  .ad-ps-controls .icon-btn { min-width: 36px; }
+  .ad-ps-selectores .segmented button { min-height: 34px; }
+}

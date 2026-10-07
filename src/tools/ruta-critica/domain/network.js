@@ -49,11 +49,19 @@ export function buildNetwork(acts) {
     sets.set(k, new Set(s));
     return true;
   };
-  rpreds.forEach((ps) => { if (ps.length) addSet(ps); });
+  // Un evento se identifica por todas las actividades que deben haber terminado (las predecesoras y las de ellas),
+  // así dos conjuntos de predecesoras equivalentes caen en el mismo evento.
+  const close = (ps) => {
+    const s = new Set(ps);
+    ps.forEach((p) => anc[p].forEach((x) => s.add(x)));
+    return s;
+  };
+  rpreds.forEach((ps) => { if (ps.length) addSet(close(ps)); });
   const terminal = [];
   for (let i = 0; i < n; i++) if (!hasSucc[i]) terminal.push(i);
-  const endKey = key(terminal);
-  addSet(terminal);
+  const endSet = close(terminal);
+  const endKey = key(endSet);
+  addSet(endSet);
 
   const home = new Array(n);
   let changed = true;
@@ -85,7 +93,7 @@ export function buildNetwork(acts) {
       id: 'a' + edgeSeq++,
       kind: 'activity',
       act: names[a],
-      from: rpreds[a].length ? nodeOf.get(key(rpreds[a])) : START,
+      from: rpreds[a].length ? nodeOf.get(key(close(rpreds[a]))) : START,
       to: nodeOf.get(home[a]),
     });
   }
@@ -178,6 +186,7 @@ export function buildNetwork(acts) {
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k).push(e);
   }
+  const auxPool = new Map();
   for (const group of groups.values()) {
     if (group.length < 2) continue;
     const dummies = group.filter((e) => e.kind === 'dummy');
@@ -185,12 +194,61 @@ export function buildNetwork(acts) {
     if (actsG.length) dummies.forEach((d) => { edges = edges.filter((x) => x !== d); });
     else dummies.slice(1).forEach((d) => { edges = edges.filter((x) => x !== d); });
     actsG.sort((x, y) => names.indexOf(x.act) - names.indexOf(y.act));
-    for (const e of actsG.slice(1)) {
-      const mid = 'n' + nodeSeq++;
+    // Los eventos auxiliares que desembocan en el mismo evento se comparten entre grupos de paralelas
+    // (la i-ésima sobrante de cada grupo usa el auxiliar i): así se usan menos ficticias.
+    actsG.slice(1).forEach((e, i) => {
       const to = e.to;
-      e.to = mid;
-      edges.push({ id: 'd' + edgeSeq++, kind: 'dummy', from: mid, to });
+      if (!auxPool.has(to)) auxPool.set(to, []);
+      const pool = auxPool.get(to);
+      if (!pool[i]) {
+        pool[i] = 'n' + nodeSeq++;
+        edges.push({ id: 'd' + edgeSeq++, kind: 'dummy', from: pool[i], to });
+      }
+      e.to = pool[i];
+    });
+  }
+
+  // Última pasada: una ficticia que se puede quitar sin alterar ninguna dependencia no es necesaria.
+  const cumpleTabla = (list) => {
+    const inN = new Map();
+    const outN = new Map();
+    list.forEach((e) => {
+      inN.set(e.to, (inN.get(e.to) || 0) + 1);
+      outN.set(e.from, (outN.get(e.from) || 0) + 1);
+    });
+    const nodos = new Set([START, ...list.flatMap((e) => [e.from, e.to])]);
+    for (const v of nodos) {
+      if (!inN.get(v) && v !== START) return false;
+      if (!outN.get(v) && v !== END) return false;
     }
+    const reach = new Map([...nodos].map((v) => [v, new Set()]));
+    const pend = new Map([...nodos].map((v) => [v, inN.get(v) || 0]));
+    const cola = [...nodos].filter((v) => !pend.get(v));
+    let visitados = 0;
+    while (cola.length) {
+      const v = cola.pop();
+      visitados++;
+      for (const e of list) {
+        if (e.from !== v) continue;
+        const dst = reach.get(e.to);
+        reach.get(v).forEach((x) => dst.add(x));
+        if (e.kind === 'activity') dst.add(idx.get(e.act));
+        pend.set(e.to, pend.get(e.to) - 1);
+        if (pend.get(e.to) === 0) cola.push(e.to);
+      }
+    }
+    if (visitados !== nodos.size) return false;
+    return list.every((e) => {
+      if (e.kind !== 'activity') return true;
+      const got = reach.get(e.from);
+      const want = anc[idx.get(e.act)];
+      return got.size === want.size && [...want].every((x) => got.has(x));
+    });
+  };
+  for (const d of [...edges].reverse()) {
+    if (d.kind !== 'dummy') continue;
+    const sin = edges.filter((e) => e !== d);
+    if (cumpleTabla(sin)) edges = sin;
   }
 
   const nodeIds = [...new Set([START, ...edges.flatMap((e) => [e.from, e.to])])];

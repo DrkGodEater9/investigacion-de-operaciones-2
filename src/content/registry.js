@@ -11,10 +11,27 @@ import { lazy } from 'react';
 export const BUILT = {
   'redes-estructura': {
     teoria: lazy(() => import('../topics/redes-estructura/Teoria.jsx')),
+    paso: lazy(() => import('../topics/redes-estructura/Paso.jsx')),
     resuelve: lazy(() => import('../topics/redes-estructura/Resuelve.jsx')),
+    practica: lazy(() => import('../topics/redes-estructura/Practica.jsx')),
   },
   'redes-tiempos': {
+    teoria: lazy(() => import('../topics/redes-tiempos/Teoria.jsx')),
+    paso: lazy(() => import('../topics/redes-tiempos/Paso.jsx')),
     resuelve: lazy(() => import('../topics/redes-tiempos/Resuelve.jsx')),
+    practica: lazy(() => import('../topics/redes-tiempos/Practica.jsx')),
+  },
+  'redes-costos': {
+    teoria: lazy(() => import('../topics/redes-costos/Teoria.jsx')),
+    paso: lazy(() => import('../topics/redes-costos/Paso.jsx')),
+    resuelve: lazy(() => import('../topics/redes-costos/Resuelve.jsx')),
+    practica: lazy(() => import('../topics/redes-costos/Practica.jsx')),
+  },
+  'redes-recursos': {
+    teoria: lazy(() => import('../topics/redes-recursos/Teoria.jsx')),
+    paso: lazy(() => import('../topics/redes-recursos/Paso.jsx')),
+    resuelve: lazy(() => import('../topics/redes-recursos/Resuelve.jsx')),
+    practica: lazy(() => import('../topics/redes-recursos/Practica.jsx')),
   },
   'entera-pura': {
     teoria: lazy(() => import('../topics/entera-pura/Teoria.jsx')),
@@ -22,17 +39,29 @@ export const BUILT = {
     resuelve: lazy(() => import('../topics/entera-pura/Resuelve.jsx')),
     practica: lazy(() => import('../topics/entera-pura/Practica.jsx')),
   },
+  'entera-mixta': {
+    teoria: lazy(() => import('../topics/entera-mixta/Teoria.jsx')),
+    paso: lazy(() => import('../topics/entera-mixta/Paso.jsx')),
+    resuelve: lazy(() => import('../topics/entera-mixta/Resuelve.jsx')),
+    practica: lazy(() => import('../topics/entera-mixta/Practica.jsx')),
+  },
   'entera-binaria': {
     teoria: lazy(() => import('../topics/entera-binaria/Teoria.jsx')),
     paso: lazy(() => import('../topics/entera-binaria/Paso.jsx')),
     resuelve: lazy(() => import('../topics/entera-binaria/Resuelve.jsx')),
     practica: lazy(() => import('../topics/entera-binaria/Practica.jsx')),
   },
-  'entera-mixta': {
-    teoria: lazy(() => import('../topics/entera-mixta/Teoria.jsx')),
-    paso: lazy(() => import('../topics/entera-mixta/Paso.jsx')),
-    resuelve: lazy(() => import('../topics/entera-mixta/Resuelve.jsx')),
-    practica: lazy(() => import('../topics/entera-mixta/Practica.jsx')),
+  'decision-bayes': {
+    teoria: lazy(() => import('../topics/decision-bayes/Teoria.jsx')),
+    paso: lazy(() => import('../topics/decision-bayes/Paso.jsx')),
+    resuelve: lazy(() => import('../topics/decision-bayes/Resuelve.jsx')),
+    practica: lazy(() => import('../topics/decision-bayes/Practica.jsx')),
+  },
+  'decision-arboles': {
+    teoria: lazy(() => import('../topics/decision-arboles/Teoria.jsx')),
+    paso: lazy(() => import('../topics/decision-arboles/Paso.jsx')),
+    resuelve: lazy(() => import('../topics/decision-arboles/Resuelve.jsx')),
+    practica: lazy(() => import('../topics/decision-arboles/Practica.jsx')),
   },
 };
 

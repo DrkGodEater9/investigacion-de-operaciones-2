@@ -1,0 +1,40 @@
+/* Práctica del tema 2.2: estructura; colores y bordes salen de base.css */
+.ad-pr { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; min-width: 0; }
+.ad-pr-tipos .segmented { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--ink); max-width: 100%; }
+.ad-pr-tipos .segmented button, .ad-pr-tipos .segmented button + button { border: 0; padding: 8px 6px; min-height: 36px; }
+@media (min-width: 720px) { .ad-pr-tipos .segmented { grid-template-columns: repeat(3, auto); } .ad-pr-tipos .segmented button { padding: 6px 12px; } }
+.ad-pr-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.ad-pr-barra .inline-field input { width: 90px; }
+.ad-pr-sesion { margin-left: auto; font-size: 13px; color: var(--muted); }
+.ad-pr-card { border: 1px solid var(--rule-strong); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ad-pr-card h3 { font-family: var(--serif); font-size: 18px; }
+.ad-pr-semilla { font-size: 12px; color: var(--muted); }
+.ad-pr-enunciado { font-family: var(--serif); font-size: 16px; margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+.ad-pr-arbol { border: 1px solid var(--rule); border-radius: var(--radius); overflow-x: auto; max-width: 100%; padding: 6px; background: #fff; position: relative; }
+.ad-pr-tabla { max-width: 100%; overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); position: relative; }
+.ad-pr-tabla table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+.ad-pr-tabla th { background: var(--wash); font-size: 12.5px; padding: 5px 8px; border-bottom: 1px solid var(--ink); text-align: center; white-space: nowrap; }
+.ad-pr-tabla td { padding: 5px 8px; border-bottom: 1px solid var(--rule); text-align: center; white-space: nowrap; }
+.ad-pr-tabla td:first-child, .ad-pr-tabla th:first-child { text-align: left; }
+.ad-pr-pregunta { margin: 0; font-weight: 600; }
+.ad-pr-campo { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--rule); padding-top: 14px; }
+.ad-pr-campo legend, .ad-pr-campo > label { font-weight: 600; font-size: 13.5px; padding: 0; }
+.ad-pr-campo input[type='text'] { height: 34px; width: 100%; max-width: 220px; border: 1px solid var(--rule-strong); border-radius: var(--radius); padding: 0 10px; background: #fff; }
+.ad-pr-campo input[aria-invalid='true'] { border-color: var(--red); }
+.ad-pr-ayuda { font-size: 12.5px; color: var(--muted); }
+.ad-pr-ayuda.is-mal { color: var(--red); }
+.ad-pr-opciones { display: flex; flex-direction: column; gap: 6px; }
+.ad-pr-opciones label { display: flex; align-items: flex-start; gap: 8px; min-height: 32px; cursor: pointer; overflow-wrap: anywhere; }
+.ad-pr-opciones input { width: 18px; height: 18px; flex: none; margin-top: 2px; accent-color: var(--accent); }
+.ad-pr-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.ad-pr-resultado { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.ad-pr-veredicto { border: 1px solid var(--accent); border-radius: var(--radius); padding: 12px 14px; color: var(--ink); }
+.ad-pr-veredicto h4 { color: var(--accent); margin: 0 0 4px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.ad-pr-veredicto.is-mal { border-color: var(--red); }
+.ad-pr-veredicto.is-mal h4 { color: var(--red); }
+.ad-pr-veredicto p { margin: 0 0 4px; white-space: pre-line; font-size: 13.5px; overflow-wrap: anywhere; }
+.ad-pr-texto { margin: 4px 0 0; font-size: 13.5px; white-space: pre-line; overflow-wrap: anywhere; }
+.ad-pr-enlaces { margin: 0; font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.ad-pr-enlaces a { color: var(--accent); }
+@media (max-width: 760px) { .ad-pr-acciones .btn { min-height: 36px; } .ad-pr-barra .inline-field input, .ad-pr-barra .btn { min-height: 34px; } }
+@media (max-width: 719px) { .ad-pr-tipos .segmented button:last-child:nth-child(odd) { grid-column: 1 / -1; } }

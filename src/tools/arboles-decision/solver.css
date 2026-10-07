@@ -1,0 +1,89 @@
+/* Resuelve el tuyo (tema 2.2). Solo lo que base.css no trae; variables de base.css. */
+.ad-solver { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; min-width: 0; }
+.ad-panel { border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; min-width: 0; }
+.ad-cuerpo { padding: 14px 16px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+.ad-panel > .ad-cuerpo { padding-top: 14px; }
+.ad-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
+.ad-bloque { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; }
+.ad-nota { margin: 0; font-size: 12.5px; color: var(--muted); }
+.ad-etiqueta { font-size: 13px; font-weight: 600; }
+.ad-cab { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; border-bottom: 1px solid var(--rule); padding-bottom: 10px; }
+.ad-sub { font-family: var(--serif); font-size: 17px; margin: 6px 0 0; }
+
+/* Entradas */
+.ad-in, .ad-textarea { border: 1px solid var(--rule-strong); border-radius: var(--radius); background: #fff; font-size: 13px; }
+.ad-in { height: 30px; padding: 0 6px; min-width: 0; }
+.ad-in:focus, .ad-textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.ad-in[aria-invalid='true'] { border-color: var(--red); background: var(--red-wash); }
+.ad-in--num { width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+.ad-in--etiqueta { flex: 1 1 130px; width: auto; min-width: 100px; }
+.ad-in--nombre { flex: 1 1 160px; min-width: 120px; font-family: var(--serif); font-weight: 600; font-size: 14px; }
+.ad-in--unidad { width: 170px; max-width: 100%; }
+.ad-textarea { width: 100%; padding: 8px 10px; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; line-height: 1.45; resize: vertical; }
+
+/* Editor del árbol */
+.ad-editor { min-width: 0; overflow-x: auto; padding-bottom: 4px; }
+.ad-nodo { border: 1px solid var(--rule-strong); border-left: 3px solid var(--ink); border-radius: var(--radius); background: #fff; padding: 8px 10px; display: grid; gap: 8px; min-width: 0; }
+.ad-nodo--azar { border-left-color: var(--accent); }
+.ad-nodo--final { border-left-color: var(--rule-strong); display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--wash); }
+.ad-nodo.is-error { border-color: var(--red); border-left-color: var(--red); }
+.ad-nodo-cab { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; min-width: 0; }
+.ad-nodo-pie { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.ad-ramas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.ad-rama { display: grid; gap: 6px; min-width: 0; }
+.ad-rama-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
+.ad-rama > .ad-nodo { margin-left: 14px; }
+.ad-campo { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; color: var(--muted); }
+.ad-campo span { white-space: nowrap; }
+.ad-suma { font-size: 12.5px; font-variant-numeric: tabular-nums; margin-left: auto; }
+.ad-suma.is-mal { color: var(--red); font-weight: 600; }
+
+/* Tablas */
+.ad-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; position: relative; }
+.ad-tabla { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+.ad-tabla th { background: var(--wash); text-align: center; font-size: 12px; font-weight: 600; padding: 5px 7px; border-bottom: 1px solid var(--ink); }
+.ad-tabla td { padding: 4px 7px; border-bottom: 1px solid var(--rule); text-align: center; }
+.ad-tabla--izq td, .ad-tabla--izq th { text-align: left; }
+.ad-tabla tr:last-child td { border-bottom: 0; }
+.ad-tabla tr.is-optima td { background: var(--accent-wash); color: var(--accent); font-weight: 700; }
+
+/* Resultados */
+.ad-resultado { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }
+.ad-estado { margin: 0; font-family: var(--serif); }
+.ad-estado-z { margin: 0; font-size: 20px; font-weight: 600; }
+.ad-lista { margin: 4px 0 2px; padding-left: 20px; font-size: 14px; }
+.ad-figura { min-width: 0; }
+.ad-arbol { padding: 8px; }
+.ad-leyenda { margin: 0; font-size: 12.5px; color: var(--muted); }
+.ad-aviso { margin: 0; padding: 7px 10px; border: 1px solid var(--rule-strong); border-left: 3px solid var(--accent); border-radius: var(--radius); font-size: 13px; background: var(--accent-wash); }
+.ad-aviso p { margin: 2px 0; }
+.ad-errores { border: 1px solid var(--red); border-radius: var(--radius); background: var(--red-wash); color: var(--red); padding: 10px 14px; font-size: 13.5px; }
+.ad-errores ul { margin: 6px 0 0; padding-left: 20px; }
+
+/* Sensibilidad */
+.ad-sens { display: grid; gap: 10px; min-width: 0; }
+.ad-quesi { border: 1px solid var(--rule); border-radius: var(--radius); padding: 8px 12px; display: grid; gap: 4px; }
+.ad-quesi-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 14px; }
+.ad-quesi-fila input[type='range'] { flex: 1 1 200px; min-width: 120px; accent-color: var(--accent); height: 28px; cursor: pointer; }
+
+/* Plantilla */
+.ad-codigo { border: 1px solid var(--rule); border-radius: var(--radius); min-width: 0; position: relative; }
+.ad-codigo-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--rule); background: var(--wash); font-size: 13px; font-weight: 600; }
+.ad-pre { margin: 0; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; line-height: 1.5; }
+
+.ad-solver .segmented { max-width: 100%; flex-wrap: wrap; }
+.ad-solver .toggle, .ad-panel { position: relative; }
+.ad-fila .inline-field { min-width: 0; max-width: 100%; }
+.ad-fila .inline-field select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
+@media (max-width: 760px) {
+  .ad-solver .btn { min-height: 34px; }
+  .ad-solver .segmented button { min-height: 34px; }
+  .ad-solver select, .ad-solver .inline-field input { min-height: 34px; }
+  .ad-in { height: 34px; font-size: 14px; }
+  .ad-in--num { width: 66px; }
+  .ad-cuerpo { padding: 12px; }
+  .ad-rama > .ad-nodo { margin-left: 8px; }
+}
+
+.ad-check { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; min-height: 32px; cursor: pointer; }
+.ad-check input { width: 18px; height: 18px; flex: none; margin-top: 1px; accent-color: var(--accent); }

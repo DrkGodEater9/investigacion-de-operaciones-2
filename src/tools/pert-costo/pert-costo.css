@@ -1,0 +1,153 @@
+/* Tema 3.3 (PERT/COSTO): estilos de las pestañas Paso a paso, Resuelve y Práctica. Prefijo pc-. Colores y bordes salen de base.css. */
+
+/* Desplazamiento de dibujos y tablas anchas dentro de su caja */
+.pc-scroll { width: 100%; max-width: 100%; overflow-x: auto; position: relative; border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; }
+.pc-red, .pc-curva { display: block; max-width: none; }
+.pc-tabla-caja { max-width: 100%; overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; position: relative; }
+.pc-tabla { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.pc-tabla th { background: var(--wash); text-align: center; font-size: 12px; font-weight: 600; padding: 5px 9px; border-bottom: 1px solid var(--ink); white-space: nowrap; }
+.pc-tabla td { padding: 4px 9px; border-bottom: 1px solid var(--rule); text-align: center; white-space: nowrap; }
+.pc-tabla tr:last-child td { border-bottom: 0; }
+.pc-paso .pc-tabla th, .pc-paso .pc-tabla td { padding-left: 6px; padding-right: 6px; }
+.pc-tabla--izq td:first-child, .pc-tabla--izq th:first-child { text-align: left; }
+.pc-tabla tr.is-critica td:first-child { color: var(--red); font-weight: 700; }
+.pc-tabla tr.is-optima td { background: var(--accent-wash); color: var(--accent); font-weight: 700; }
+.pc-tabla tr.is-cambio td { background: var(--accent-wash); color: var(--accent); }
+.pc-tabla tr.is-actual td { background: var(--accent-wash); }
+.pc-tabla tr.is-error td { background: var(--red-wash); }
+
+/* Piezas comunes */
+.pc-nota { margin: 0; font-size: 12.5px; color: var(--muted); }
+.pc-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
+.pc-bloque { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; }
+.pc-aviso { margin: 0; padding: 7px 10px; border: 1px solid var(--rule-strong); border-left: 3px solid var(--accent); border-radius: var(--radius); font-size: 13px; background: var(--accent-wash); }
+.pc-aviso--mal { border-left-color: var(--red); background: var(--red-wash); }
+.pc-errores { border: 1px solid var(--red); border-radius: var(--radius); background: var(--red-wash); color: var(--red); padding: 10px 14px; font-size: 13.5px; }
+.pc-errores ul { margin: 6px 0 0; padding-left: 20px; }
+.pc-leyenda { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.pc-ley--rojo { color: var(--red); font-weight: 600; }
+.pc-ley--azul { color: var(--accent); font-weight: 600; }
+.pc-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.pc-kpis > div { border: 1px solid var(--rule); border-radius: var(--radius); padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pc-kpis dt { font-size: 12px; color: var(--muted); }
+.pc-kpis dd { margin: 0; font-family: var(--serif); font-size: 22px; font-weight: 600; line-height: 1.15; }
+.pc-kpis span { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.pc-kpis--chico { margin-top: 2px; }
+.pc-kpis--chico > div { padding: 6px 8px; }
+.pc-kpis--chico dd { font-size: 19px; }
+.pc-kpis .pc-kpi-total { border-color: var(--accent); }
+.pc-kpis .pc-kpi-total dd { color: var(--accent); }
+.pc-rango { accent-color: var(--accent); cursor: pointer; height: 6px; flex: 1 1 160px; min-width: 120px; }
+
+/* Entradas */
+.pc-in, .pc-textarea { border: 1px solid var(--rule-strong); border-radius: var(--radius); background: #fff; font-size: 13px; }
+.pc-in { height: 30px; padding: 0 6px; min-width: 0; }
+.pc-in:focus, .pc-textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.pc-in[aria-invalid='true'] { border-color: var(--red); }
+.pc-in--num { width: 74px; text-align: right; font-variant-numeric: tabular-nums; }
+.pc-in--nombre { width: 64px; text-align: center; font-family: var(--serif); font-weight: 600; }
+.pc-in--preds { width: 110px; }
+.pc-in--titulo { width: min(320px, 100%); }
+.pc-textarea { width: 100%; padding: 8px 10px; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; line-height: 1.45; resize: vertical; }
+.pc-parametros { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: flex-end; }
+.pc-campo { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; color: var(--muted); min-width: 0; max-width: 100%; }
+.pc-campo--objetivo { margin-top: 2px; }
+.pc-campo--objetivo .pc-in { width: 130px; text-align: left; }
+.pc-tabla--editor td { padding: 3px 4px; }
+.pc-tabla--editor th { padding: 5px 8px; }
+.pc-celda-acc { white-space: nowrap; }
+.pc-icono { width: 30px; height: 30px; }
+
+/* Resuelve */
+.pc-solver { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; min-width: 0; }
+.pc-panel { border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; min-width: 0; }
+.pc-panel--entrada, .pc-solver > .pc-panel { padding: 0; }
+.pc-cuerpo { padding: 14px 16px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+.pc-panel > .pc-cuerpo { padding-top: 14px; }
+.pc-solver > .pc-panel.pc-cuerpo { padding: 14px 16px 16px; }
+.pc-cab-res { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; border-bottom: 1px solid var(--rule); padding-bottom: 10px; }
+.pc-cab-res h3 { font-family: var(--serif); font-size: 18px; }
+.pc-resultado { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
+.pc-seccion { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; }
+.pc-seccion h3 { font-family: var(--serif); font-size: 17px; margin-top: 4px; }
+.pc-actualizando { opacity: .55; }
+.pc-control { font-size: 13px; }
+.pc-detalle summary { cursor: pointer; font-size: 13px; font-weight: 600; padding: 4px 0; }
+.pc-explica { margin: 6px 0 0; padding-left: 20px; font-size: 13.5px; line-height: 1.5; }
+.pc-explica li { margin: 8px 0; }
+.pc-codigo { border: 1px solid var(--rule); border-radius: var(--radius); min-width: 0; position: relative; }
+.pc-codigo-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--rule); background: var(--wash); font-size: 13px; font-weight: 600; }
+.pc-pre { margin: 0; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; line-height: 1.5; }
+.pc-solver .inline-field { min-width: 0; max-width: 100%; }
+.pc-solver .inline-field select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
+.pc-solver .toggle, .pc-solver .segmented { position: relative; }
+
+/* Paso a paso */
+.pc-paso { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; min-width: 0; }
+.pc-cab { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.pc-cab h2 { margin: 0; font-family: var(--serif); font-size: 20px; font-weight: 600; }
+.pc-etiqueta { font-size: 12px; color: var(--muted); border: 1px solid var(--rule); padding: 2px 8px; border-radius: var(--radius); background: var(--wash); }
+.pc-selectores { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+.pc-enunciado { border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pc-enunciado p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+.pc-barra { border: 1px solid var(--rule); border-radius: var(--radius); padding: 10px 14px; display: grid; gap: 8px; background: #fafaf8; }
+.pc-controles { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pc-play { min-width: 96px; margin: 0 4px; }
+.pc-cuenta { margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pc-barra .pc-rango { width: 100%; flex: none; }
+.pc-principal { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.pc-principal--curva { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); }
+.pc-tarjeta, .pc-paso .pc-panel { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pc-tarjeta { border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; }
+.pc-tarjeta h3 { margin: 0; font-family: var(--serif); font-size: 18px; }
+.pc-tarjeta p { margin: 0; font-size: 14.5px; line-height: 1.55; }
+.pc-calculo { background: #fbfbf9; border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 10px 14px; font-family: var(--serif); font-size: 14.5px; line-height: 1.6; overflow-wrap: anywhere; }
+.pc-paso .pc-panel h4 { margin: 0; font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+
+/* Práctica */
+.pc-practica { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; min-width: 0; }
+.pc-tipos .segmented { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--ink); max-width: 100%; }
+.pc-tipos .segmented button, .pc-tipos .segmented button + button { border: 0; padding: 8px 6px; min-height: 36px; }
+@media (min-width: 720px) { .pc-tipos .segmented { grid-template-columns: repeat(4, auto); } .pc-tipos .segmented button { padding: 6px 12px; } }
+.pc-barra-p { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.pc-barra-p .inline-field input { width: 90px; }
+.pc-sesion { margin-left: auto; font-size: 13px; color: var(--muted); }
+.pc-card { border: 1px solid var(--rule-strong); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.pc-card h3 { font-family: var(--serif); font-size: 18px; }
+.pc-semilla { font-size: 12px; color: var(--muted); }
+.pc-enunciado-p, .pc-card .pc-enunciado { border: 0; padding: 0; background: none; }
+.pc-card .pc-enunciado { font-family: var(--serif); font-size: 16px; margin: 0; overflow-wrap: anywhere; }
+.pc-pregunta { margin: 0; font-weight: 600; }
+.pc-campo-resp { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--rule); padding-top: 14px; }
+.pc-campo-resp legend, .pc-campo-resp > label { font-weight: 600; font-size: 13.5px; padding: 0; }
+.pc-campo-resp input[type='text'] { height: 34px; width: 100%; max-width: 220px; border: 1px solid var(--rule-strong); border-radius: var(--radius); padding: 0 10px; background: #fff; }
+.pc-campo-resp input[aria-invalid='true'] { border-color: var(--red); }
+.pc-ayuda { font-size: 12.5px; color: var(--red); }
+.pc-opciones { display: flex; flex-direction: row; flex-wrap: wrap; gap: 6px 18px; }
+.pc-opciones label { display: flex; align-items: flex-start; gap: 8px; min-height: 32px; cursor: pointer; }
+.pc-opciones input { width: 18px; height: 18px; flex: none; margin-top: 2px; accent-color: var(--accent); }
+.pc-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.pc-resultado-p { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pc-veredicto { border: 1px solid var(--accent); border-radius: var(--radius); padding: 12px 14px; }
+.pc-veredicto h4 { margin: 0 0 4px; font-size: 14px; display: flex; align-items: center; gap: 8px; color: var(--accent); }
+.pc-veredicto.is-mal { border-color: var(--red); }
+.pc-veredicto.is-mal h4 { color: var(--red); }
+.pc-veredicto p { margin: 0 0 4px; white-space: pre-line; font-size: 13.5px; overflow-wrap: anywhere; }
+.pc-texto { margin: 4px 0 0; font-size: 13.5px; white-space: pre-line; overflow-wrap: anywhere; }
+.pc-enlaces { margin: 0; font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.pc-enlaces a { color: var(--accent); }
+
+@media (max-width: 760px) {
+  .pc-principal, .pc-principal--curva { grid-template-columns: minmax(0, 1fr); }
+  .pc-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pc-cuenta { margin-left: 0; width: 100%; }
+  .pc-cuerpo, .pc-solver > .pc-panel.pc-cuerpo { padding: 12px; }
+  .pc-solver .btn, .pc-paso .btn, .pc-practica .btn { min-height: 34px; }
+  .pc-controles .icon-btn { min-height: 36px; min-width: 36px; }
+  .pc-paso .segmented button, .pc-solver .segmented button { min-height: 34px; }
+  .pc-icono { width: 34px; height: 34px; }
+  .pc-in { height: 34px; }
+  .pc-practica .pc-barra-p .inline-field input, .pc-practica .pc-barra-p .btn { min-height: 34px; }
+  .pc-solver .inline-field select { height: 34px; }
+  .pc-enlaces a { display: inline-flex; align-items: center; min-height: 32px; }
+}
