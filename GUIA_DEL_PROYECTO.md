@@ -39,7 +39,7 @@ Reglas:
 - **La lógica de cálculo vive en `tools/<herramienta>/domain/` como funciones puras** (sin React, sin DOM), para poder probarla con Node. Los componentes solo muestran.
 - Los temas en `topics/` componen: una pestaña `Resuelve.jsx` normalmente monta una herramienta. Una herramienta se puede usar en varios temas (por ejemplo, las dos primeras enteras comparten solucionador).
 - Importa entre capas con el alias `@/` (`@/ui/Tabs.jsx`); dentro de una herramienta, rutas relativas.
-- Nada de `localStorage` fuera del progreso de estudio. Nada de peticiones de red.
+- Nada de `localStorage` fuera del progreso de estudio. Nada de peticiones de red, salvo las tipografías de Google Fonts de `index.html`.
 - `npm run build` produce un único `index.html` autocontenido. Las librerías nuevas se agregan con cuidado (peso) y se cargan con `import()` dinámico si son pesadas.
 
 ## 4. Cómo construir una pieza
@@ -78,7 +78,7 @@ Reglas:
 - **1.3 Entera binaria**: modelos clásicos (mochila, selección de proyectos, asignación, costo fijo) y restricciones lógicas; resolver por enumeración implícita / B&B.
 - **2.1 Bayesiana**: tabla a priori, verosimilitud, conjunta, posterior; decisión óptima, VEIP y valor de la información muestral.
 - **2.2 Árboles de decisión**: editor del árbol (nodos de decisión y de azar), inducción hacia atrás animada, sensibilidad de una probabilidad.
-- **3.1 y 3.2 Estructura y tiempo**: hechos (`tools/ruta-critica`). Falta Paso a paso y Práctica.
+- **3.1 y 3.2 Estructura y tiempo**: hechos (`tools/ruta-critica`).
 - **3.3 Costos (PERT/COSTO)**: duración y costo normal y límite, pendiente de costo, reducción paso a paso de la ruta crítica (ojo con varias rutas críticas simultáneas), curva costo-duración. Reutiliza `ruta-critica/domain` para la red.
 - **3.4 Recursos**: histograma de recursos sobre el Gantt, detección de picos, programación con recursos limitados (reglas de prioridad por holgura), duración resultante. Reutiliza `ruta-critica/domain`.
 

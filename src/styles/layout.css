@@ -162,3 +162,7 @@
   .example-select { min-width: 0; max-width: 100%; }
   .tool-group, .diagram-head, .diagram-toolbar { flex-wrap: wrap; max-width: 100%; }
 }
+
+.skip-link { position: absolute; left: 8px; top: -48px; z-index: 100; background: #fff; color: var(--accent); border: 1px solid var(--accent); padding: 8px 12px; }
+.skip-link:focus { top: 8px; }
+.site-content:focus { outline: none; }

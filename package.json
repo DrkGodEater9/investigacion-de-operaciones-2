@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node src/tools/ruta-critica/test/verify.mjs && node src/tools/entera/test/verify.mjs && node --test src/tools/entera/test/mixta.test.mjs && node --test src/tools/entera/test/practicaMixta.test.mjs && node --test src/tools/entera/test/pasosMixta.test.mjs && node --test src/tools/entera/test/estres.test.mjs && node --test src/tools/entera-binaria/test/dominio.test.js && node --test src/tools/entera-binaria/test/balas.test.js && node --test src/tools/entera-binaria/test/generador.test.js && node --test src/tools/entera-binaria/test/auditoria.test.js && node --test src/tools/entera-binaria/test/auditoriaGenerador.test.js && node --test src/tools/entera-binaria/test/auditoriaExportar.test.js && node --test src/tools/ruta-critica/test/estructura.test.js && node --test src/tools/ruta-critica/test/tiempos.test.js && node --test src/tools/ruta-critica/test/practicaTiempo.test.js && node --test src/tools/bayes/test/*.test.js && node --test src/tools/arboles-decision/test/*.test.js && node --test src/tools/recursos/test/*.test.js && node --test src/tools/pert-costo/test/*.test.js && node --test src/tools/ruta-critica/test/auditoriaRed.test.js && node --test src/tools/ruta-critica/test/auditoriaTiempo.test.js && node --test src/shared/test/campos.test.js && node --test src/tools/entera/test/auditoria*.test.mjs"
+    "test": "node scripts/test.mjs"
   },
   "author": "",
   "license": "ISC",
@@ -22,5 +22,8 @@
     "vite": "^5.4.21",
     "vite-plugin-singlefile": "^2.3.3"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
 }
