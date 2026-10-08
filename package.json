@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test:ui": "node scripts/humo.mjs",
     "test": "node scripts/test.mjs"
   },
   "author": "",
@@ -18,6 +19,8 @@
     "svg2pdf.js": "^2.8.1"
   },
   "devDependencies": {
+    "@fontsource/public-sans": "^5.3.0",
+    "@fontsource/stix-two-text": "^5.3.0",
     "@vitejs/plugin-react": "^4.7.0",
     "vite": "^5.4.21",
     "vite-plugin-singlefile": "^2.3.3"

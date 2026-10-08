@@ -14,7 +14,7 @@ El índice del curso está en `src/content/curriculum.js` (sale del syllabus y d
 
 ## 2. Diseño (no se negocia)
 - Fondo blanco, líneas negras finas, aspecto de documento formal, como un PDF. Nada de gradientes, sombras fuertes ni decoración.
-- Tipografías: texto de interfaz en Public Sans; títulos, fórmulas y dibujos en STIX Two Text (serif). Ya están en `index.html`.
+- Tipografías: texto de interfaz en Public Sans; títulos, fórmulas y dibujos en STIX Two Text (serif). Ya están incrustadas desde `main.jsx`.
 - Color solo con función: azul `#1d3f8f` para lo interactivo y lo resaltado, rojo `#b3261e` para errores o para resaltar lo crítico. Todo lo demás es negro sobre blanco.
 - Usa las variables de `src/styles/base.css` (`--ink`, `--rule`, `--accent`, `--serif`…) y los componentes de `src/ui/` (Tabs, Segmented, Toggle, Toast, Article, StatusMark). No inventes otros estilos de botón o de tabla.
 - Los dibujos son SVG hechos a mano: círculo partido para eventos (número arriba), trazo negro, letra serif. Tienen que verse igual en pantalla, en PNG y en PDF.
@@ -39,7 +39,7 @@ Reglas:
 - **La lógica de cálculo vive en `tools/<herramienta>/domain/` como funciones puras** (sin React, sin DOM), para poder probarla con Node. Los componentes solo muestran.
 - Los temas en `topics/` componen: una pestaña `Resuelve.jsx` normalmente monta una herramienta. Una herramienta se puede usar en varios temas (por ejemplo, las dos primeras enteras comparten solucionador).
 - Importa entre capas con el alias `@/` (`@/ui/Tabs.jsx`); dentro de una herramienta, rutas relativas.
-- Nada de `localStorage` fuera del progreso de estudio. Nada de peticiones de red, salvo las tipografías de Google Fonts de `index.html`.
+- Nada de `localStorage` fuera del progreso de estudio. Nada de peticiones de red. Las tipografías van incrustadas (paquetes `@fontsource`, importados en `main.jsx`).
 - `npm run build` produce un único `index.html` autocontenido. Las librerías nuevas se agregan con cuidado (peso) y se cargan con `import()` dinámico si son pesadas.
 
 ## 4. Cómo construir una pieza

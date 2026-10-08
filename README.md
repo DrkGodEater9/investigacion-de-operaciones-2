@@ -12,7 +12,7 @@ Sitio en React (Vite) con un menú por módulos y temas. Cada tema tiene cuatro 
 npm install
 npm run dev     # desarrollo
 npm run build   # genera dist/index.html (un solo archivo)
-npm test        # corre todas las pruebas de lógica (descubre solas los *.test.js y verify.mjs)
+npm test        # pruebas de lógica (*.test.js, verify.mjs) y prueba de humo que renderiza cada pestaña
 ```
 
 Requiere Node 20 o superior. En cada push y pull request, GitHub Actions corre `npm test` y `npm run build`.

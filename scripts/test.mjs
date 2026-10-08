@@ -27,6 +27,7 @@ const correr = (args, etiqueta) => {
 
 for (const f of verifies) correr([f], relative(raiz, f));
 if (pruebas.length) correr(['--test', ...pruebas], `${pruebas.length} archivos de prueba (node --test)`);
+correr(['scripts/humo.mjs'], 'prueba de humo de la interfaz');
 
 if (fallos) { console.error(`\n✖ ${fallos} grupo(s) de pruebas fallaron`); process.exit(1); }
 console.log('\n✔ Todas las pruebas pasaron');
